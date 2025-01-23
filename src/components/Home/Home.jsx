@@ -804,7 +804,7 @@ const Home = () => {
   };
 
 const printBarcode = () => {
-  const barcodeContainer = document.querySelector("#barcode-container"); // Select the entire barcode div
+  const barcodeContainer = document.querySelector("#barcode-container"); // Select the barcode div
   if (barcodeContainer) {
     // Clone the barcode content
     const printContent = barcodeContainer.cloneNode(true);
@@ -813,74 +813,81 @@ const printBarcode = () => {
     const printContainer = document.createElement("div");
     printContainer.classList.add("print-barcode-container");
 
-    printContainer.innerHTML = `
-      <div class="print-content">
-        
-        ${printContent.innerHTML} <!-- Keep the barcode inside -->
-      </div>
+    printContainer.appendChild(printContent); // Use the existing structure
 
-      <style>
-        @media print {
-          body * {
-            visibility: hidden;
-          }
-
-          .print-barcode-container, 
-          .print-barcode-container * {
-            visibility: visible;
-          }
-
-          .print-barcode-container {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-          }
-
-          .print-content {
-            text-align: center;
-            padding: 20px;
-            border: 2px solid black;
-          }
-
-          .logo-and-text {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 10px;
-          }
-
-          .logo-and-text img {
-            width: 50px;
-            height: 50px;
-            margin-right: 10px;
-          }
-
-          .logo-and-text span {
-            font-size: 20px;
-            font-weight: bold;
-          }
-
-          svg {
-            margin-top: 20px;
-          }
+    // Add optimized print styles to fit within one page
+    const printStyle = document.createElement("style");
+    printStyle.innerHTML = `
+      @media print {
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+          page-break-inside: avoid;
         }
-      </style>
+
+        body * {
+          visibility: hidden;
+        }
+
+        .print-barcode-container, 
+        .print-barcode-container * {
+          visibility: visible;
+        }
+
+        .print-barcode-container {
+          position: absolute;
+          left: 50%;
+          top: 50%;
+          transform: translate(-50%, -50%);
+          width: auto;
+          height: auto;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          background: white;
+        }
+
+        #barcode-container {
+          text-align: center;
+          padding: 10px;
+          border: 2px solid black;
+          width: max-content;
+          height: max-content;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+        }
+
+        svg {
+          max-width: 100%;
+        }
+
+        /* Ensure only one page is used */
+        html, body {
+          width: 100%;
+          height: 100%;
+          overflow: hidden;
+        }
+
+        /* Prevent extra blank pages */
+        .print-barcode-container {
+          max-height: 100vh;
+        }
+      }
     `;
 
-    // Append to the document for printing
+    // Append the style and barcode content for printing
     document.body.appendChild(printContainer);
+    document.head.appendChild(printStyle);
 
     // Trigger the print
     window.print();
 
-    // Remove the container after printing
+    // Remove the print elements after printing
     setTimeout(() => {
       document.body.removeChild(printContainer);
+      document.head.removeChild(printStyle);
     }, 500);
   } else {
     alert("Barcode not found!");
@@ -961,12 +968,7 @@ const printBarcode = () => {
             <div id="barcode-container" className="text-center">
               {/* Logo and Hospital Name */}
               <div className="flex items-center justify-center mb-2">
-                <img
-                  src="../../../public/favicon_io/favicon-32x32.png" // Replace with the actual logo path
-                  alt="APH Logo"
-                  className="w-12 h-12 mr-2"
-                />
-                <span className="text-lg font-bold">APH HOSPITAL</span>
+                <span className="text-lg font-bold">APH</span>
               </div>
               {/* Barcode SVG */}
               <svg ref={barcodeRef}></svg>
