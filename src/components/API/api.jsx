@@ -1,9 +1,7 @@
 import axios from "axios";
 
 const baseURL =
-  process.env.NODE_ENV === "production"
-    ? "https://path-backend.onrender.com" // Production backend
-    : "http://localhost:5000"; // Development backend
+  process.env.REACT_APP_API_URL || "https://path-backend.onrender.com"; // Default to production backend
 
 export default axios.create({
   baseURL,
