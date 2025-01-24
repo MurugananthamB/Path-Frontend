@@ -10,6 +10,8 @@ const Home = () => {
     age: "",
     gender: "",
   });
+
+  const [barcode, setBarcode] = useState(""); // Store barcode
   const [barcodeVisible, setBarcodeVisible] = useState(false);
   const barcodeRef = useRef(null);
 
@@ -21,34 +23,47 @@ const Home = () => {
     });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    const now = new Date();
-    const currentDate = now.toISOString().split("T")[0];
-    const currentTime = now.toLocaleTimeString([], { hour12: true });
+  const now = new Date();
+  const currentDate = now.toISOString().split("T")[0];
+  const currentTime = now.toLocaleTimeString([], { hour12: true });
 
-    try {
-      const response = await api.post("/api/patients/add-patient", {
-        ...formData,
-        date: currentDate,
-        time: currentTime,
-      });
+  // Ensure pathId is entered
+  if (!formData.pathId) {
+    alert("Path ID is required.");
+    return;
+  }
 
-      alert(response.data.message); // Notify the user of success
-      setBarcodeVisible(true); // Display barcode
-    } catch (error) {
-      console.error("Error:", error);
-      alert(
-        error.response?.data?.message ||
-          "Failed to save data. Please try again."
-      );
-    }
-  };
+  // ✅ Declare and set generatedBarcode
+  const generatedBarcode = formData.pathId; // Use pathId as the barcode
+
+  try {
+    // ✅ Include barcode in the API request
+    const response = await api.post("/api/patients/add-patient", {
+      ...formData,
+      barcode: generatedBarcode, // Ensure barcode is sent
+      date: currentDate,
+      time: currentTime,
+    });
+
+    alert(response.data.message); // Notify the user of success
+
+    // ✅ Set barcode value as pathId and display it
+    setBarcode(formData.pathId);
+    setBarcodeVisible(true); // Display barcode
+  } catch (error) {
+    console.error("Error:", error.response?.data || error.message);
+    alert(
+      error.response?.data?.error || "Failed to save data. Please try again."
+    );
+  }
+};
 
   const generateBarcode = () => {
-    if (barcodeRef.current && formData.pathId) {
-      JsBarcode(barcodeRef.current, formData.pathId, {
+    if (barcodeRef.current && barcode) {
+      JsBarcode(barcodeRef.current, barcode, {
         format: "CODE39",
         lineColor: "#000",
         width: 2,
@@ -58,21 +73,21 @@ const Home = () => {
     }
   };
 
-const printBarcode = () => {
-  const barcodeContainer = document.querySelector("#barcode-container"); // Select the barcode div
-  if (barcodeContainer) {
-    // Clone the barcode content
-    const printContent = barcodeContainer.cloneNode(true);
+  const printBarcode = () => {
+    const barcodeContainer = document.querySelector("#barcode-container"); // Select the barcode div
+    if (barcodeContainer) {
+      // Clone the barcode content
+      const printContent = barcodeContainer.cloneNode(true);
 
-    // Create a print-specific container
-    const printContainer = document.createElement("div");
-    printContainer.classList.add("print-barcode-container");
+      // Create a print-specific container
+      const printContainer = document.createElement("div");
+      printContainer.classList.add("print-barcode-container");
 
-    printContainer.appendChild(printContent); // Use the existing structure
+      printContainer.appendChild(printContent); // Use the existing structure
 
-    // Add optimized print styles to fit within one page
-    const printStyle = document.createElement("style");
-    printStyle.innerHTML = `
+      // Add optimized print styles to fit within one page
+      const printStyle = document.createElement("style");
+      printStyle.innerHTML = `
       @media print {
         * {
           margin: 0;
@@ -106,7 +121,6 @@ const printBarcode = () => {
         #barcode-container {
           text-align: center;
           padding: 10px;
-          border: 2px solid black;
           width: max-content;
           height: max-content;
           display: flex;
@@ -132,24 +146,22 @@ const printBarcode = () => {
       }
     `;
 
-    // Append the style and barcode content for printing
-    document.body.appendChild(printContainer);
-    document.head.appendChild(printStyle);
+      // Append the style and barcode content for printing
+      document.body.appendChild(printContainer);
+      document.head.appendChild(printStyle);
 
-    // Trigger the print
-    window.print();
+      // Trigger the print
+      window.print();
 
-    // Remove the print elements after printing
-    setTimeout(() => {
-      document.body.removeChild(printContainer);
-      document.head.removeChild(printStyle);
-    }, 500);
-  } else {
-    alert("Barcode not found!");
-  }
-};
-
-
+      // Remove the print elements after printing
+      setTimeout(() => {
+        document.body.removeChild(printContainer);
+        document.head.removeChild(printStyle);
+      }, 500);
+    } else {
+      alert("Barcode not found!");
+    }
+  };
 
   useEffect(() => {
     if (barcodeVisible) {
