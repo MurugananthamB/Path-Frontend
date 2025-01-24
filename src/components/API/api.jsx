@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const baseURL = "http://localhost:5000/"; // Production backend URL
+const baseURL = "https://path-backend.onrender.com"; // Updated to use Render backend
 
 export default axios.create({
   baseURL,
