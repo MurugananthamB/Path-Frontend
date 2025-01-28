@@ -23,145 +23,154 @@ const Home = () => {
     });
   };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  const now = new Date();
-  const currentDate = now.toISOString().split("T")[0];
-  const currentTime = now.toLocaleTimeString([], { hour12: true });
+    const now = new Date();
+    const currentDate = now.toISOString().split("T")[0];
+    const currentTime = now.toLocaleTimeString([], { hour12: true });
 
-  // Ensure pathId is entered
-  if (!formData.pathId) {
-    alert("Path ID is required.");
-    return;
-  }
+    if (!formData.pathId) {
+      alert("Path ID is required.");
+      return;
+    }
 
-  // ✅ Declare and set generatedBarcode
-  const generatedBarcode = formData.pathId; // Use pathId as the barcode
+    const generatedBarcode = formData.pathId;
 
-  try {
-    // ✅ Include barcode in the API request
-    const response = await api.post("/api/patients/add-patient", {
-      ...formData,
-      barcode: generatedBarcode, // Ensure barcode is sent
-      date: currentDate,
-      time: currentTime,
-    });
+    try {
+      const response = await api.post("/api/patients/add-patient", {
+        ...formData,
+        barcode: generatedBarcode,
+        date: currentDate,
+        time: currentTime,
+      });
 
-    alert(response.data.message); // Notify the user of success
+      alert(response.data.message);
 
-    // ✅ Set barcode value as pathId and display it
-    setBarcode(formData.pathId);
-    setBarcodeVisible(true); // Display barcode
-  } catch (error) {
-    console.error("Error:", error.response?.data || error.message);
-    alert(
-      error.response?.data?.error || "Failed to save data. Please try again."
-    );
-  }
-};
+      setBarcode(formData.pathId);
+      setBarcodeVisible(true);
+    } catch (error) {
+      console.error("Error:", error.response?.data || error.message);
+      alert(
+        error.response?.data?.error || "Failed to save data. Please try again."
+      );
+    }
+  };
 
   const generateBarcode = () => {
     if (barcodeRef.current && barcode) {
       JsBarcode(barcodeRef.current, barcode, {
-        format: "CODE39",
+        format: "CODE128",
         lineColor: "#000",
         width: 2,
-        height: 100,
+        height: 60, // Reduced height to fit
         displayValue: true,
       });
     }
   };
 
-  const printBarcode = () => {
-    const barcodeContainer = document.querySelector("#barcode-container"); // Select the barcode div
-    if (barcodeContainer) {
-      // Clone the barcode content
-      const printContent = barcodeContainer.cloneNode(true);
+ const printBarcode = () => {
+   document
+     .querySelectorAll(".print-barcode-container")
+     .forEach((el) => el.remove());
 
-      // Create a print-specific container
-      const printContainer = document.createElement("div");
-      printContainer.classList.add("print-barcode-container");
+   const printContainer = document.createElement("div");
+   printContainer.classList.add("print-barcode-container");
 
-      printContainer.appendChild(printContent); // Use the existing structure
+   // Add "APH" text at the top (Only once)
+   const heading = document.createElement("h3");
+   heading.textContent = "APH";
+   heading.style.fontSize = "10px";
+   heading.style.fontWeight = "bold";
+   heading.style.textAlign = "center";
+   heading.style.margin = "0";
+   printContainer.appendChild(heading);
 
-      // Add optimized print styles to fit within one page
-      const printStyle = document.createElement("style");
-      printStyle.innerHTML = `
-      @media print {
-        * {
-          margin: 0;
-          padding: 0;
-          box-sizing: border-box;
-          page-break-inside: avoid;
-        }
+   // Generate new barcode instead of cloning
+   const barcodeSVG = document.createElementNS(
+     "http://www.w3.org/2000/svg",
+     "svg"
+   );
+   JsBarcode(barcodeSVG, barcode, {
+     format: "CODE128",
+     lineColor: "#000",
+     width: 2,
+     height: 10, // Adjusted height to fit perfectly
+     displayValue: false, // Prevents duplicate numbers
+   });
 
-        body * {
-          visibility: hidden;
-        }
+   // Append barcode
+   printContainer.appendChild(barcodeSVG);
 
-        .print-barcode-container, 
-        .print-barcode-container * {
-          visibility: visible;
-        }
+   // Path ID below barcode (Only once)
+   const pathIdText = document.createElement("p");
+   pathIdText.textContent = barcode;
+   pathIdText.style.fontSize = "8px";
+   pathIdText.style.margin = "2px 0 0 0";
+   pathIdText.style.textAlign = "center";
+   printContainer.appendChild(pathIdText);
 
-        .print-barcode-container {
-          position: absolute;
-          left: 50%;
-          top: 50%;
-          transform: translate(-50%, -50%);
-          width: auto;
-          height: auto;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          background: white;
-        }
-
-        #barcode-container {
-          text-align: center;
-          padding: 10px;
-          width: max-content;
-          height: max-content;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-        }
-
-        svg {
-          max-width: 100%;
-        }
-
-        /* Ensure only one page is used */
-        html, body {
-          width: 100%;
-          height: 100%;
-          overflow: hidden;
-        }
-
-        /* Prevent extra blank pages */
-        .print-barcode-container {
-          max-height: 100vh;
-        }
+   // Print styles
+   const printStyle = document.createElement("style");
+   printStyle.innerHTML = `
+    @media print {
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        page-break-inside: avoid;
       }
-    `;
-
-      // Append the style and barcode content for printing
-      document.body.appendChild(printContainer);
-      document.head.appendChild(printStyle);
-
-      // Trigger the print
-      window.print();
-
-      // Remove the print elements after printing
-      setTimeout(() => {
-        document.body.removeChild(printContainer);
-        document.head.removeChild(printStyle);
-      }, 500);
-    } else {
-      alert("Barcode not found!");
+      body * {
+        visibility: hidden;
+      }
+      .print-barcode-container, 
+      .print-barcode-container * {
+        visibility: visible;
+      }
+      .print-barcode-container {
+        position: fixed;
+        left: 50%;
+        top: 50%;
+        width: 25mm;
+        height: 18mm;
+        transform: translate(-50%, -50%);
+        background: white;
+        text-align: center;
+        font-family: Arial, sans-serif;
+        padding: 2mm;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        page-break-after: avoid;
+      }
+      .print-barcode-container h3 {
+        font-size: 10px;
+        font-weight: bold;
+      }
+      svg {
+        width: 22mm;
+        height: 10mm;
+        display: block;
+        margin: 0 auto;
+      }
+      .path-id-text {
+        font-size: 8px;
+        text-align: center;
+      }
     }
-  };
+  `;
+
+   document.body.appendChild(printContainer);
+   document.head.appendChild(printStyle);
+
+   window.print();
+
+   setTimeout(() => {
+     document.body.removeChild(printContainer);
+     document.head.removeChild(printStyle);
+   }, 500);
+ };
 
   useEffect(() => {
     if (barcodeVisible) {
@@ -231,13 +240,8 @@ const handleSubmit = async (e) => {
       {barcodeVisible && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-8 rounded shadow-lg text-center">
-            <h3 className="text-xl font-bold mb-4">Generated Barcode</h3>
+            <h3 className="text-xl font-bold mb-4">APH</h3>
             <div id="barcode-container" className="text-center">
-              {/* Logo and Hospital Name */}
-              <div className="flex items-center justify-center mb-2">
-                <span className="text-lg font-bold">APH</span>
-              </div>
-              {/* Barcode SVG */}
               <svg ref={barcodeRef}></svg>
             </div>
             <div className="mt-4 space-x-4">
