@@ -41,3 +41,399 @@
   color: #888;
 }
 
+/* styles.css */
+/* Basic Reset and Body Styling */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Arial', sans-serif;
+  background: linear-gradient(135deg, #4caf50, #2a9d8f);
+  height: 100vh;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Container Styling */
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+/* Box Styling */
+.login-box {
+  background: white;
+  padding: 40px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+}
+
+.login-box h2 {
+  font-size: 2rem;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+/* Form Group Styling */
+.form-group {
+  margin-bottom: 15px;
+  text-align: left;
+}
+
+.form-group label {
+  font-size: 1.1rem;
+  margin-bottom: 5px;
+  color: #555;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 12px;
+  font-size: 1rem;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  transition: border-color 0.3s;
+}
+
+.form-group input:focus {
+  border-color: #2a9d8f;
+  outline: none;
+}
+
+/* Button Styling */
+
+
+.login-btn:hover {
+  background-color: #e68900;
+}
+
+/* Success and Error Messages */
+p {
+  font-size: 1rem;
+  margin-top: 10px;
+}
+
+p.green {
+  color: green;
+}
+
+p.red {
+  color: red;
+}
+
+/* Dashboard Container */
+.dashboard-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  color: white;
+  font-family: 'Arial', sans-serif;
+  padding: 20px;
+}
+
+/* Header Section */
+.dashboard-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.dashboard-header h1 {
+  font-size: 3rem;
+  font-weight: bold;
+}
+
+.subtitle {
+  font-size: 1.2rem;
+  font-style: italic;
+  color: #e0e0e0;
+}
+
+/* Buttons Container */
+.dashboard-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  
+}
+
+/* Same Style for All Buttons */
+
+
+/* Button Colors for All Buttons */
+.dashboard-btn {
+  width: 100%;
+  padding: 12px;
+  font-size: 1.1rem;
+  background-color: #e68900;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+/* Hover and Focus Effects for All Buttons */
+.dashboard-btn:hover {
+  transform: scale(1.15); /* Slight increase in size on hover */
+}
+
+.dashboard-btn:focus {
+  outline: none;
+}
+
+
+/* Footer */
+.dashboard-footer {
+  margin-top: 50px;
+  text-align: center;
+  color: #e0e0e0;
+  font-size: 0.9rem;
+}
+/* Basic Reset and Body Styling */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Arial', sans-serif;
+  background: linear-gradient(135deg, #2a9d8f, #4caf50);
+  height: 100vh;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Container Styling */
+.signup-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+/* Box Styling */
+.signup-box {
+  background: white;
+  padding: 40px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+}
+
+/* Heading Styling */
+.signup-box h2 {
+  font-size: 2rem;
+  margin-bottom: 30px;
+  color: #333;
+}
+
+/* Form Group Styling */
+.form-group {
+  margin-bottom: 15px;
+  text-align: left;
+}
+
+.form-group label {
+  font-size: 1.1rem;
+  margin-bottom: 5px;
+  color: #555;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 12px;
+  font-size: 1rem;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  transition: border-color 0.3s;
+}
+
+.form-group input:focus {
+  border-color: #2a9d8f;
+  outline: none;
+}
+
+/* Button Styling */
+.signup-btn {
+  width: 100%;
+  padding: 12px;
+  font-size: 1.1rem;
+  background-color: #e68900;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.signup-btn:hover {
+  background-color: #e68900; 
+  transform: scale(1.15);
+}
+
+.signup-btn:focus {
+  outline: none;
+  }
+  
+
+/* Success and Error Messages */
+.success-msg {
+  color: green;
+  font-size: 1rem;
+  margin-top: 20px;
+}
+
+.error-msg {
+  color: red;
+  font-size: 1rem;
+  margin-top: 20px;
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+  .signup-box {
+    padding: 20px;
+    width: 90%;
+  }
+
+  .signup-box h2 {
+    font-size: 1.5rem;
+  }
+}
+
+
+
+
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f4f4f9;
+  color: #333;
+}
+
+.user-management-container {
+  max-width: 900px;
+  margin: 20px auto;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+h2 {
+  text-align: center;
+  color: #444;
+}
+
+.signup-box {
+  margin-bottom: 30px;
+}
+
+.signup-box h3 {
+  margin-bottom: 15px;
+  color: #555;
+}
+
+.signup-box form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.signup-box input {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+.signup-box button {
+  padding: 10px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.signup-box button:hover {
+  background-color: #0056b3;
+}
+
+.success-msg {
+  color: #28a745;
+  font-weight: bold;
+}
+
+.error-msg {
+  color: #dc3545;
+  font-weight: bold;
+}
+
+/* Container for the whole user management component */
+.user-management-container {
+  height: 100vh; /* Full viewport height */
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* Search bar container */
+.search-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.search-container input {
+  padding: 8px;
+  width: 300px; /* Increase the width of the input */
+  font-size: 14px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  margin-right: 10px;
+}
+
+.search-container button {
+  padding: 8px 12px;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  background-color: #4CAF50;
+  color: white;
+}
+
+.search-container button:hover {
+  background-color: #45a049;
+}
+
+
+
+
+
+
+
+
+
+
+
+
