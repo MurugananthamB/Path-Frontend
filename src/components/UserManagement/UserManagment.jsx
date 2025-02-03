@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import api from "../API/api"; // Import the axios instance
+import api from "../API/api";
+
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
@@ -10,7 +11,7 @@ const UserManagement = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const { data } = await api.get("/api/users");
+        const { data } = await api.get("/api/auth/users");
         const sortedData = data.sort((a, b) =>
           a.employeeId.localeCompare(b.employeeId)
         );
@@ -28,7 +29,7 @@ const UserManagement = () => {
     const newName = prompt("Enter the new name:");
     if (newName) {
       api
-        .put(`/users/${userId}`, { firstName: newName })
+        .put(`/api/auth/users/${userId}`, { firstName: newName })
         .then(() => {
           setUsers((prevUsers) =>
             prevUsers.map((user) =>
@@ -49,7 +50,7 @@ const UserManagement = () => {
     if (newPassword) {
       api
         .put(
-          `/users/${userId}/reset-password`,
+          `/api/auth//users/${userId}/reset-password`,
           { password: newPassword } // Make sure the password is being sent correctly
         )
         .then(() => {
@@ -66,7 +67,7 @@ const UserManagement = () => {
   const handleStatusToggle = (userId, currentStatus) => {
     const newStatus = currentStatus === "active" ? "inactive" : "active";
     api
-      .put(`/users/${userId}/status`, {
+      .put(`/api/auth//users/${userId}/status`, {
         status: newStatus,
       })
       .then(() => {
@@ -95,61 +96,66 @@ const UserManagement = () => {
       user.employeeId.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  return (
-    <div className="user-management-container">
-      <h2>User Management</h2>
+return (
+  <div className="user-management-container">
+    <h2>User Management</h2>
+    {loading ? (
+      <p>Loading users...</p>
+    ) : (
+      <>
+        {/* Search Box */}
+        <div className="search-container">
+          <input
+            type="text"
+            placeholder="Search by name or employee ID"
+            value={searchTerm}
+            onChange={handleSearch}
+          />
+        </div>
 
-      {/* Error Message */}
-      {error && <p className="error-msg">{error}</p>}
-
-      {/* Search Box */}
-      <div className="search-container">
-        <input
-          type="text"
-          placeholder="Search by name or employee ID"
-          value={searchTerm}
-          onChange={handleSearch}
-        />
-      </div>
-
-      {/* Users Table */}
-      <div className="user-table">
-        <h3>All Users</h3>
-        <table>
-          <thead>
-            <tr>
-              <th>Employee ID</th>
-              <th>Name</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredUsers.map((user) => (
-              <tr key={user._id}>
-                <td>{user.employeeId}</td>
-                <td>{user.firstName}</td>
-                <td>{user.status === "active" ? "Active" : "Inactive"}</td>
-                <td>
-                  <div style={{ display: "flex", gap: "10px" }}>
-                    <button onClick={() => handleEdit(user._id)}>Edit</button>
-                    <button onClick={() => handlePasswordReset(user._id)}>
-                      Reset Password
-                    </button>
-                    <button
-                      onClick={() => handleStatusToggle(user._id, user.status)}
-                    >
-                      {user.status === "active" ? "Deactivate" : "Activate"}
-                    </button>
-                  </div>
-                </td>
+        {/* Users Table */}
+        <div className="user-table">
+          <h3>All Users</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Employee ID</th>
+                <th>Name</th>
+                <th>Status</th>
+                <th>Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
+            </thead>
+            <tbody>
+              {filteredUsers.map((user) => (
+                <tr key={user._id}>
+                  <td>{user.employeeId}</td>
+                  <td>{user.firstName}</td>
+                  <td>{user.status === "active" ? "Active" : "Inactive"}</td>
+                  <td>
+                    <div style={{ display: "flex", gap: "10px" }}>
+                      <button onClick={() => handleEdit(user._id)}>Edit</button>
+                      <button onClick={() => handlePasswordReset(user._id)}>
+                        Reset Password
+                      </button>
+                      <button
+                        onClick={() =>
+                          handleStatusToggle(user._id, user.status)
+                        }
+                      >
+                        {user.status === "active" ? "Deactivate" : "Activate"}
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </>
+    )}
+  </div>
+);
+
 };
 
 export default UserManagement;

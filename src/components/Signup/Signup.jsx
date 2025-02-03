@@ -1,11 +1,10 @@
-import axios from "axios";
 import React, { useState } from "react";
+import api from "../API/api";
 
 const Signup = () => {
   const [formData, setFormData] = useState({
-    firstName: "",
+    name: "",
     employeeId: "",
-
     password: "",
     passwordConfirmation: "",
   });
@@ -25,10 +24,10 @@ const Signup = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const { firstName, employeeId, password, passwordConfirmation } = formData;
+    const { name, employeeId, password, passwordConfirmation } = formData;
 
     // Client-side validation for empty fields
-    if (!firstName || !employeeId || !password || !passwordConfirmation) {
+    if (!name || !employeeId || !password || !passwordConfirmation) {
       setError("All fields are required.");
       return;
     }
@@ -41,10 +40,7 @@ const Signup = () => {
 
     try {
       // Send POST request to backend
-      const response = await axios.post(
-        "http://localhost:3001/signup",
-        formData
-      );
+      const response = await api.post("/api/auth/signup", formData);
 
       // If signup is successful
       console.log("Response:", response.data);
@@ -83,8 +79,8 @@ const Signup = () => {
             <label>Name:</label>
             <input
               type="text"
-              name="firstName"
-              value={formData.firstName}
+              name="name"
+              value={formData.name}
               onChange={handleChange}
               required
             />

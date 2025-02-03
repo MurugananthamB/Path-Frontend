@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom"; // Import useNavigate from react-router-dom
+import api from "../API/api";
 
 const Login = () => {
   const [employeeId, setEmployeeId] = useState("");
@@ -19,7 +19,7 @@ const Login = () => {
     }
 
     try {
-      const response = await axios.post("http://localhost:3001/login", {
+      const response = await api.post("/api/auth/login", {
         employeeId,
         password,
       });
@@ -30,7 +30,7 @@ const Login = () => {
       setSuccess(true);
       setError(null);
 
-      navigate("/pathologylabel");
+      navigate("/Home");
     } catch (err) {
       console.error("Error:", err.response ? err.response.data : err.message);
       let errorMessage = "An error occurred while logging in.";
