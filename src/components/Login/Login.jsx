@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom"; // Import useNavigate from react-router-dom
+import { useNavigate } from "react-router-dom"; 
 import api from "../API/api";
 
 const Login = () => {
@@ -7,6 +7,7 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
 
@@ -18,39 +19,39 @@ const Login = () => {
       return;
     }
 
+    setLoading(true);
+
     try {
       const response = await api.post("/api/auth/login", {
         employeeId,
         password,
       });
 
-      // Store login data in localStorage
-      localStorage.setItem("employeeData", JSON.stringify(response.data));
+      if (response.data && response.data.userId) {
+        // ✅ Store userId properly for Home.jsx
+        localStorage.setItem("userId", response.data.userId);
+        sessionStorage.setItem("userId", response.data.userId); // Optional
 
-      setSuccess(true);
-      setError(null);
+        setSuccess(true);
+        setError(null);
+        setLoading(false);
 
-      navigate("/Home");
-    } catch (err) {
-      console.error("Error:", err.response ? err.response.data : err.message);
-      let errorMessage = "An error occurred while logging in.";
-
-      if (err.response) {
-        errorMessage = err.response.data.message || err.message;
-      } else if (err.request) {
-        errorMessage =
-          "No response from the server. Please check your network connection.";
+        navigate("/Home");
+      } else {
+        throw new Error("Invalid response from server.");
       }
-
-      setError(errorMessage);
-      setSuccess(false);
+    } catch (err) {
+      console.error("Login error:", err.response?.data || err.message);
+      alert(err.response?.data?.message || "Login failed. Please try again.");
     }
   };
 
   return (
     <div className="login-container">
       <div className="login-box">
-        <h2>Login</h2>
+        <h2>
+          <b>Login</b>
+        </h2>
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label>Employee ID:</label>
@@ -72,7 +73,21 @@ const Login = () => {
               required
             />
           </div>
-          <button type="submit" className="login-btn">
+          <button
+            type="submit"
+            style={{
+              backgroundColor: "#4CAF50",
+              padding: "10px 15px",
+              color: "white",
+              border: "none",
+              borderRadius: "4px",
+              cursor: "pointer",
+              width: "100%",
+            }}
+            onMouseEnter={(e) => (e.target.style.backgroundColor = "#45a049")}
+            onMouseLeave={(e) => (e.target.style.backgroundColor = "#4CAF50")}
+            disabled={loading} // ✅ Disable button while logging in
+          >
             Login
           </button>
         </form>
