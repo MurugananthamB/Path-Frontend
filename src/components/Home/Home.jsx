@@ -288,7 +288,7 @@ const Home = () => {
             <div id="barcode-container" className="text-center">
               <svg ref={barcodeRef}></svg>
             </div>
-            <div className="mt-4 space-x-4">
+            <div className="mt-4 flex justify-center items-center gap-4 bg-gray-100 p-3 rounded-lg shadow-md">
               <button
                 className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
                 onClick={printBarcode}
