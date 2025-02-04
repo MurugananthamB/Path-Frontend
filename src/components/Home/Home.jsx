@@ -279,6 +279,13 @@ const Home = () => {
         >
           Submit
         </button>
+        <button
+          type="submit"
+          className="w-full mt-6  text-white py-2 rounded"
+          onClick={() => navigate("/reprint")} // ✅ Redirect to /reprint page
+        >
+          Reprint Label
+        </button>
       </form>
 
       {barcodeVisible && (
