@@ -1,8 +1,10 @@
 import React, { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import JsBarcode from "jsbarcode";
 import api from "../API/api"; // Import the axios instance
 
 const Home = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     pathId: "",
     uhid: "",
@@ -185,8 +187,20 @@ const Home = () => {
     }
   }, [barcodeVisible]);
 
+  const handleLogout = () => {
+    localStorage.clear();
+    sessionStorage.clear();
+    navigate("/login", { replace: true });
+  };
+
+
   return (
     <div className="flex justify-center items-center h-screen overflow-hidden">
+      <div className="logout-btn-container">
+        <button onClick={handleLogout} className="logout-btn">
+          Logout
+        </button>
+      </div>
       <form
         className="bg-white p-8 rounded shadow-lg w-full max-w-md"
         onSubmit={handleSubmit}
