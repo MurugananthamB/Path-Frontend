@@ -80,10 +80,10 @@ const Home = () => {
    // Add "APH" text at the top (Only once)
    const heading = document.createElement("h3");
    heading.textContent = "APH";
-   heading.style.fontSize = "10px";
+   heading.style.fontSize = "14px";
    heading.style.fontWeight = "bold";
    heading.style.textAlign = "center";
-   heading.style.margin = "0";
+   heading.style.margin = "5px";
    printContainer.appendChild(heading);
 
    // Generate new barcode instead of cloning
@@ -94,9 +94,10 @@ const Home = () => {
    JsBarcode(barcodeSVG, barcode, {
      format: "CODE128",
      lineColor: "#000",
-     width: 2,
-     height: 10, // Adjusted height to fit perfectly
+     width: 2.5,
+     height: 40, // Adjusted height to fit perfectly
      displayValue: false, // Prevents duplicate numbers
+     margin: 5, // Provides extra spacing for clean printing
    });
 
    // Append barcode
@@ -105,8 +106,10 @@ const Home = () => {
    // Path ID below barcode (Only once)
    const pathIdText = document.createElement("p");
    pathIdText.textContent = barcode;
-   pathIdText.style.fontSize = "8px";
-   pathIdText.style.margin = "2px 0 0 0";
+   pathIdText.style.fontSize = "12px";
+   pathIdText.style.fontWeight = "bold";
+   pathIdText.style.marginTop = "5px"; // Adjusted spacing
+   //   pathIdText.style.margin = "2px 2px  0";
    pathIdText.style.textAlign = "center";
    printContainer.appendChild(pathIdText);
 
@@ -131,32 +134,36 @@ const Home = () => {
         position: fixed;
         left: 50%;
         top: 50%;
-        width: 25mm;
-        height: 18mm;
+        width: 40mm;
+        height: 25mm;
         transform: translate(-50%, -50%);
         background: white;
         text-align: center;
         font-family: Arial, sans-serif;
-        padding: 2mm;
+        padding: 3mm;
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
         page-break-after: avoid;
+        border: 1px solid black; /* Optional border to check alignment */
       }
       .print-barcode-container h3 {
-        font-size: 10px;
+        font-size: 30px;
         font-weight: bold;
+        margin-bottom: 5px;
       }
       svg {
-        width: 22mm;
-        height: 10mm;
+       width: 25mm; /* Adjusted barcode width */
+        height: 25mm; /* Adjusted barcode height */
         display: block;
         margin: 0 auto;
       }
-      .path-id-text {
-        font-size: 8px;
+      .print-barcode-container p {
+        font-size: 12px;
+        font-weight: bold;
         text-align: center;
+        margin-top: 5px;
       }
     }
   `;

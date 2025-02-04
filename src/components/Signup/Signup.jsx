@@ -3,7 +3,7 @@ import api from "../API/api";
 
 const Signup = () => {
   const [formData, setFormData] = useState({
-    name: "",
+    firstName: "",
     employeeId: "",
     password: "",
     passwordConfirmation: "",
@@ -24,10 +24,10 @@ const Signup = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const { name, employeeId, password, passwordConfirmation } = formData;
+    const { firstName, employeeId, password, passwordConfirmation } = formData;
 
     // Client-side validation for empty fields
-    if (!name || !employeeId || !password || !passwordConfirmation) {
+    if (!firstName || !employeeId || !password || !passwordConfirmation) {
       setError("All fields are required.");
       return;
     }
@@ -40,7 +40,10 @@ const Signup = () => {
 
     try {
       // Send POST request to backend
-      const response = await api.post("/api/auth/signup", formData);
+      const response = await api.post(
+        "/api/auth/signup",
+        formData
+      );
 
       // If signup is successful
       console.log("Response:", response.data);
@@ -79,8 +82,8 @@ const Signup = () => {
             <label>Name:</label>
             <input
               type="text"
-              name="name"
-              value={formData.name}
+              name="firstName"
+              value={formData.firstName}
               onChange={handleChange}
               required
             />

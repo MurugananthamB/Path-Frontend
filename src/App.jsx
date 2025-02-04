@@ -7,7 +7,8 @@ import "./App.css";
 import Home from "./components/Home/Home";
 import Login from "./components/Login/Login";
 import Signup from "./components/Signup/Signup";
-import UserManagement from "./components/UserManagement/UserManagment";
+import UserManagement from "./components/UserManagement/UserManagement";
+import Dashboard from "./Dashboard/dashboard";
 
 
 
@@ -16,7 +17,8 @@ function App() {
     <div className="App">
       <Router>
         <Routes>
-          <Route path="/" element={<Login />} />
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/Login" element={<Login />} />
           <Route path="/Home" element={<Home />} />
           <Route path="/Signup" element={<Signup />} />
           <Route path="/usermanagement" element={<UserManagement />} />
