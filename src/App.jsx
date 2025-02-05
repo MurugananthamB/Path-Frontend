@@ -8,7 +8,7 @@ import Home from "./components/Home/Home";
 import Login from "./components/Login/Login";
 import Signup from "./components/Signup/Signup";
 import UserManagement from "./components/UserManagement/UserManagement";
-import Dashboard from "./Dashboard/dashboard";
+import Dashboard from "./components/Dashboard/dashboard";
 import Reprint from "./components/Home/Reprint";
 
 
