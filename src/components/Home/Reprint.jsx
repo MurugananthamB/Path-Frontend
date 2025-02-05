@@ -120,13 +120,13 @@ const Reprint = () => {
     position: fixed;
     left: 50%;
     top: 50%;
-    width: 50mm; /* ✅ Increased width for better barcode readability */
-    height: 30mm; /* ✅ Increased height to prevent text overlap */
+    width: 40mm; /* ✅ Increased width for better barcode readability */
+    height: 25mm; /* ✅ Increased height to prevent text overlap */
     transform: translate(-50%, -50%);
     background: white;
     text-align: center;
     font-family: Arial, sans-serif;
-    padding: 2mm;
+    padding: 3mm;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -135,18 +135,18 @@ const Reprint = () => {
     border: 1px solid black; /* ✅ Border for debugging print layout */
   }
   .print-barcode-container h3 {
-    font-size: 14px; /* ✅ Adjusted font size */
+    font-size: 30px; /* ✅ Adjusted font size */
     font-weight: bold;
-    margin-bottom: 3px;
+    margin-bottom: 5px;
   }
   svg {
-    width: 42mm; /* ✅ Increased barcode width for better scanability */
-    height: 15mm; /* ✅ Adjusted barcode height */
+    width: 25mm; /* ✅ Increased barcode width for better scanability */
+    height: 25mm; /* ✅ Adjusted barcode height */
     display: block;
     margin: 0 auto;
   }
   .print-barcode-container p {
-    font-size: 10px; /* ✅ Slightly increased for better readability */
+    font-size: 12px; /* ✅ Slightly increased for better readability */
     font-weight: bold;
     text-align: center;
     margin-top: 2px;
@@ -155,6 +155,7 @@ const Reprint = () => {
 `;
 
     document.body.appendChild(printContainer);
+    document.head.appendChild(printStyle);
     window.print();
 
     setTimeout(() => {
