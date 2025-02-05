@@ -26,62 +26,70 @@ const Home = () => {
     });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    const now = new Date();
-    const currentDate = now.toISOString().split("T")[0];
-    const currentTime = now.toLocaleTimeString([], { hour12: true });
+  const now = new Date();
+  const currentDate = now.toISOString().split("T")[0];
+  const currentTime = now.toLocaleTimeString([], { hour12: true });
 
-    // ✅ Retrieve `userId` from localStorage or sessionStorage
-    const storedUserId =
-      localStorage.getItem("userId") || sessionStorage.getItem("userId");
+  // ✅ Retrieve `userId` from localStorage or sessionStorage
+  const storedUserId =
+    localStorage.getItem("userId") || sessionStorage.getItem("userId");
 
-    if (!storedUserId) {
-      alert("User ID not found. Please log in again.");
-      navigate("/login");
-      return;
-    }
+  if (!storedUserId) {
+    alert("User ID not found. Please log in again.");
+    navigate("/login");
+    return;
+  }
 
-    // ✅ Convert `userId` to a string
-    const userId = String(storedUserId);
+  // ✅ Convert `userId` to a string
+  const userId = String(storedUserId);
 
-    // ✅ Validate form fields
-    if (
-      ![
-        formData.pathId,
-        formData.uhid,
-        formData.patientName,
-        formData.age,
-        formData.gender,
-      ].every(Boolean)
-    ) {
-      alert("All fields, including user ID, are required.");
-      return;
-    }
+  // ✅ Validate form fields
+  if (
+    ![
+      formData.pathId,
+      formData.uhid,
+      formData.patientName,
+      formData.age,
+      formData.gender,
+    ].every(Boolean)
+  ) {
+    alert("All fields, including user ID, are required.");
+    return;
+  }
 
-    const generatedBarcode = formData.pathId;
+  // ✅ Age Validation: Ensure age is between 0 and 99
+  const ageValue = parseInt(formData.age, 10);
+  if (isNaN(ageValue) || ageValue < 0 || ageValue > 99) {
+    alert("Age must be between 0 and 99.");
+    return;
+  }
 
-    try {
-      const response = await api.post("/api/patients/add-patient", {
-        ...formData,
-        barcode: generatedBarcode,
-        date: currentDate,
-        time: currentTime,
-        userId, // ✅ Ensure user ID is included in the request body
-      });
+  const generatedBarcode = formData.pathId;
 
-      alert(response.data.message);
+  try {
+    const response = await api.post("/api/patients/add-patient", {
+      ...formData,
+      barcode: generatedBarcode,
+      date: currentDate,
+      time: currentTime,
+      userId, // ✅ Ensure user ID is included in the request body
+    });
 
-      setBarcode(formData.pathId);
-      setBarcodeVisible(true);
-    } catch (error) {
-      console.error("Error:", error.response?.data || error.message);
-      alert(
-        error.response?.data?.error || "Failed to save data. Please try again."
-      );
-    }
-  };
+    alert(response.data.message);
+
+    setBarcode(formData.pathId);
+    setBarcodeVisible(true);
+  } catch (error) {
+    console.error("Error:", error.response?.data || error.message);
+    alert(
+      error.response?.data?.error || "Failed to save data. Please try again."
+    );
+  }
+};
+
 
   const generateBarcode = () => {
     if (barcodeRef.current && barcode) {
@@ -201,7 +209,6 @@ const Home = () => {
 
     setTimeout(() => {
       document.body.removeChild(printContainer);
-      document.head.removeChild(printStyle);
     }, 500);
   };
 
@@ -236,9 +243,9 @@ const Home = () => {
         <div className="space-y-4">
           {[
             { name: "pathId", label: "Path ID", type: "text" },
-            { name: "uhid", label: "UHID", type: "text" },
+            { name: "uhid", label: "UHID", type: "number" },
             { name: "patientName", label: "Patient Name", type: "text" },
-            { name: "age", label: "Age", type: "number" },
+            { name: "age", label: "Age", type: "number", maxLength: 2 },
           ].map((field) => (
             <div key={field.name}>
               <label className="block text-gray-700 text-left font-medium">
@@ -250,6 +257,7 @@ const Home = () => {
                 value={formData[field.name]}
                 onChange={handleChange}
                 className="w-full px-3 py-2 mt-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                maxLength={field.maxLength || undefined}
                 required
               />
             </div>
@@ -278,6 +286,13 @@ const Home = () => {
           className="w-full mt-6 bg-blue-500 text-white py-2 rounded hover:bg-blue-600"
         >
           Submit
+        </button>
+        <button
+          type="submit"
+          className="w-full mt-6  text-white py-2 rounded"
+          onClick={() => navigate("/reprint")} // ✅ Redirect to /reprint page
+        >
+          Reprint Label
         </button>
       </form>
 
