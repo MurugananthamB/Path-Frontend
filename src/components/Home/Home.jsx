@@ -26,70 +26,78 @@ const Home = () => {
     });
   };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  const now = new Date();
-  const currentDate = now.toISOString().split("T")[0];
-  const currentTime = now.toLocaleTimeString([], { hour12: true });
+    const now = new Date();
+    const currentDate = now.toISOString().split("T")[0];
+    const currentTime = now.toLocaleTimeString([], { hour12: true });
 
-  // ✅ Retrieve `userId` from localStorage or sessionStorage
-  const storedUserId =
-    localStorage.getItem("userId") || sessionStorage.getItem("userId");
+    // ✅ Retrieve `userId` from localStorage or sessionStorage
+    const storedUserId =
+      localStorage.getItem("userId") || sessionStorage.getItem("userId");
 
-  if (!storedUserId) {
-    alert("User ID not found. Please log in again.");
-    navigate("/login");
-    return;
-  }
+    if (!storedUserId) {
+      alert("User ID not found. Please log in again.");
+      navigate("/login");
+      return;
+    }
 
-  // ✅ Convert `userId` to a string
-  const userId = String(storedUserId);
+    // ✅ Convert `userId` to a string
+    const userId = String(storedUserId);
 
-  // ✅ Validate form fields
-  if (
-    ![
-      formData.pathId,
-      formData.uhid,
-      formData.patientName,
-      formData.age,
-      formData.gender,
-    ].every(Boolean)
-  ) {
-    alert("All fields, including user ID, are required.");
-    return;
-  }
+    // ✅ Validate form fields
+    if (
+      ![
+        formData.pathId,
+        formData.uhid,
+        formData.patientName,
+        formData.age,
+        formData.gender,
+      ].every(Boolean)
+    ) {
+      alert("All fields, including user ID, are required.");
+      return;
+    }
 
-  // ✅ Age Validation: Ensure age is between 0 and 99
-  const ageValue = parseInt(formData.age, 10);
-  if (isNaN(ageValue) || ageValue < 0 || ageValue > 99) {
-    alert("Age must be between 0 and 99.");
-    return;
-  }
+    // ✅ Age Validation: Ensure age is between 0 and 99
+    const ageValue = parseInt(formData.age, 10);
+    if (isNaN(ageValue) || ageValue < 0 || ageValue > 99) {
+      alert("Age must be between 0 and 99.");
+      return;
+    }
 
-  const generatedBarcode = formData.pathId;
+    const generatedBarcode = formData.pathId;
 
-  try {
-    const response = await api.post("/api/patients/add-patient", {
-      ...formData,
-      barcode: generatedBarcode,
-      date: currentDate,
-      time: currentTime,
-      userId, // ✅ Ensure user ID is included in the request body
-    });
+    try {
+      const response = await api.post("/api/patients/add-patient", {
+        ...formData,
+        barcode: generatedBarcode,
+        date: currentDate,
+        time: currentTime,
+        userId, // ✅ Ensure user ID is included in the request body
+      });
 
-    alert(response.data.message);
+      alert(response.data.message);
 
-    setBarcode(formData.pathId);
-    setBarcodeVisible(true);
-  } catch (error) {
-    console.error("Error:", error.response?.data || error.message);
-    alert(
-      error.response?.data?.error || "Failed to save data. Please try again."
-    );
-  }
-};
-
+      setBarcode(formData.pathId);
+      setBarcodeVisible(true);
+      
+      // ✅ Clear the form fields after successful submission
+      setFormData({
+        pathId: "",
+        uhid: "",
+        patientName: "",
+        age: "",
+        gender: "",
+      });
+    } catch (error) {
+      console.error("Error:", error.response?.data || error.message);
+      alert(
+        error.response?.data?.error || "Failed to save data. Please try again."
+      );
+    }
+  };
 
   const generateBarcode = () => {
     if (barcodeRef.current && barcode) {
@@ -225,6 +233,11 @@ const handleSubmit = async (e) => {
     navigate("/login", { replace: true });
   };
 
+  // ✅ Handle Report Page (Without Clearing Local Storage)
+  const handleReport = () => {
+    navigate("/report", { replace: true }); // ✅ Only navigate, don't clear session
+  };
+
   return (
     <div className="flex justify-center items-center h-screen overflow-hidden">
       <form
@@ -235,6 +248,13 @@ const handleSubmit = async (e) => {
         <div className="logout-btn-container">
           <button onClick={handleLogout} className="logout-btn">
             Logout
+          </button>
+
+          <button
+            onClick={handleReport}
+            className="bg-blue-500 mt-4 text-white px-4 py-2 rounded hover:bg-blue-600"
+          >
+            Report
           </button>
         </div>
         <h2 className="text-2xl font-bold mb-4 text-center">
