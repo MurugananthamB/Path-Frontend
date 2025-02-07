@@ -170,13 +170,24 @@ const Reprint = () => {
     navigate("/login", { replace: true });
   };
 
+  // ✅ Handle Report Page (Without Clearing Local Storage)
+  const handleReport = () => {
+    navigate("/report", { replace: true }); // ✅ Only navigate, don't clear session
+  };
+
   return (
-      <div className="flex justify-center items-center h-screen overflow-hidden">
-          <div className="logout-btn-container">
-          <button onClick={handleLogout} className="logout-btn">
-            Logout
-              </button>
-              </div>
+    <div className="flex justify-center items-center h-screen overflow-hidden">
+      <div className="logout-btn-container">
+        <button onClick={handleLogout} className="logout-btn">
+          Logout
+        </button>
+        <button
+          onClick={handleReport}
+          className="bg-blue-500 mt-4 text-white px-4 py-2 rounded hover:bg-blue-600"
+        >
+          Report
+        </button>
+      </div>
       <div className="bg-white p-8 rounded shadow-lg w-full max-w-md">
         {/* ✅ Title */}
         <h2 className="text-2xl font-bold mb-4 text-center">
@@ -202,6 +213,13 @@ const Reprint = () => {
             className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600"
           >
             Submit
+          </button>
+          <button
+            type="back"
+            className="w-full mt-2  text-white py-2 rounded"
+            onClick={() => navigate("/home")} // ✅ Redirect to /reprint page
+          >
+            Back
           </button>
         </form>
 

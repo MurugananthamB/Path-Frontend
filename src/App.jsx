@@ -10,6 +10,7 @@ import Signup from "./components/Signup/Signup";
 import UserManagement from "./components/UserManagement/UserManagement";
 import Dashboard from "./components/Dashboard/dashboard";
 import Reprint from "./components/Home/Reprint";
+import ReportScreen from "./components/Reports/report";
 
 
 
@@ -23,7 +24,8 @@ function App() {
           <Route path="/Home" element={<Home />} />
           <Route path="/Signup" element={<Signup />} />
           <Route path="/usermanagement" element={<UserManagement />} />
-          <Route path="/reprint" element={<Reprint/>} />
+          <Route path="/reprint" element={<Reprint />} />
+          <Route path="/report" element={<ReportScreen />} />
         </Routes>
       </Router>
     </div>
