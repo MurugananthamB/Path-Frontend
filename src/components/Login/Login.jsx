@@ -11,40 +11,46 @@ const Login = () => {
 
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    if (!employeeId || !password) {
-      setError("Please enter both Employee ID and Password.");
-      return;
+  if (!employeeId || !password) {
+    setError("Please enter both Employee ID and Password.");
+    return;
+  }
+
+  setLoading(true);
+
+  try {
+    const response = await api.post("/api/auth/login", {
+      employeeId,
+      password,
+    });
+
+    if (response.data && response.data.userId) {
+      localStorage.setItem("userId", response.data.userId);
+      sessionStorage.setItem("userId", response.data.userId);
+
+      setSuccess(true);
+      setError(null);
+      setLoading(false);
+
+      navigate("/Home");
+    } else {
+      throw new Error("Invalid response from server.");
     }
+  } catch (err) {
+    console.error("Login error:", err.response?.data || err.message);
 
-    setLoading(true);
+    // ✅ Ensure error message is set and loading is stopped
+    setError(err.response?.data?.message || "Login failed. Please try again.");
+    setLoading(false); // ✅ Prevent infinite freeze
 
-    try {
-      const response = await api.post("/api/auth/login", {
-        employeeId,
-        password,
-      });
+    // Optional: Reload page only if necessary
+    // window.location.reload();
+  }
+};
 
-      if (response.data && response.data.userId) {
-        // ✅ Store userId properly for Home.jsx
-        localStorage.setItem("userId", response.data.userId);
-        sessionStorage.setItem("userId", response.data.userId); // Optional
-
-        setSuccess(true);
-        setError(null);
-        setLoading(false);
-
-        navigate("/Home");
-      } else {
-        throw new Error("Invalid response from server.");
-      }
-    } catch (err) {
-      console.error("Login error:", err.response?.data || err.message);
-      alert(err.response?.data?.message || "Login failed. Please try again.");
-    }
-  };
 
   return (
     <div className="login-container">

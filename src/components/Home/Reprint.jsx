@@ -48,18 +48,18 @@ const Reprint = () => {
       JsBarcode(barcodeRef.current, patientData.pathId, {
         format: "CODE128",
         lineColor: "#000",
-        width: 2,
-        height: 60,
+        width: 2, // ✅ Adjusted width
+        height: 50, // ✅ Adjusted height
         displayValue: true,
+        margin: 0, // ✅ Reduced margin to prevent clipping
       });
     }
   }, [barcodeVisible, patientData]);
 
   // ✅ Print Barcode
   const printBarcode = () => {
-    document
-      .querySelectorAll(".print-barcode-container")
-      .forEach((el) => el.remove());
+    // Remove any existing print containers
+    document.querySelectorAll(".print-barcode-container").forEach((el) => el.remove());
 
     const printContainer = document.createElement("div");
     printContainer.classList.add("print-barcode-container");
@@ -74,17 +74,14 @@ const Reprint = () => {
     printContainer.appendChild(heading);
 
     // Generate barcode
-    const barcodeSVG = document.createElementNS(
-      "http://www.w3.org/2000/svg",
-      "svg"
-    );
+    const barcodeSVG = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     JsBarcode(barcodeSVG, patientData.pathId, {
       format: "CODE128",
       lineColor: "#000",
-      width: 2.5,
+      width: 2,
       height: 40,
       displayValue: false,
-      margin: 5,
+      margin: 2,
     });
 
     // Append barcode
@@ -95,8 +92,8 @@ const Reprint = () => {
     pathIdText.textContent = patientData.pathId;
     pathIdText.style.fontSize = "12px";
     pathIdText.style.fontWeight = "bold";
-    pathIdText.style.marginTop = "5px";
     pathIdText.style.textAlign = "center";
+    pathIdText.style.marginTop = "5px";
     printContainer.appendChild(pathIdText);
 
     // Print styles
@@ -120,36 +117,41 @@ const Reprint = () => {
     position: fixed;
     left: 50%;
     top: 50%;
-    width: 40mm; /* ✅ Increased width for better barcode readability */
-    height: 25mm; /* ✅ Increased height to prevent text overlap */
+    width: 38mm; /* Reduced from 40mm */
+    height: 25mm;
     transform: translate(-50%, -50%);
     background: white;
     text-align: center;
     font-family: Arial, sans-serif;
-    padding: 3mm;
+    padding: 4mm 3mm; /* Adjusted left & right padding */
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     page-break-after: avoid;
-    border: 1px solid black; /* ✅ Border for debugging print layout */
+    border: 1px solid black; /* Optional border */
+    overflow: visible; /* Ensures content is not cut */
   }
   .print-barcode-container h3 {
-    font-size: 30px; /* ✅ Adjusted font size */
+    font-size: 28px; /* Slightly reduced */
     font-weight: bold;
-    margin-bottom: 5px;
+    margin-bottom: 3px;
   }
   svg {
-    width: 25mm; /* ✅ Increased barcode width for better scanability */
-    height: 25mm; /* ✅ Adjusted barcode height */
+    width: 22mm; /* Reduced width */
+    height: 20mm; /* Adjusted height */
     display: block;
     margin: 0 auto;
+    overflow: visible;
   }
   .print-barcode-container p {
-    font-size: 12px; /* ✅ Slightly increased for better readability */
+    font-size: 10px; /* Reduced to fit */
     font-weight: bold;
     text-align: center;
     margin-top: 2px;
+    letter-spacing: -0.5px; /* Slightly reduced spacing */
+    word-spacing: -1px; /* Prevents cut-off effect */
+    overflow: visible;
   }
 }
 `;
@@ -170,24 +172,8 @@ const Reprint = () => {
     navigate("/login", { replace: true });
   };
 
-  // ✅ Handle Report Page (Without Clearing Local Storage)
-  const handleReport = () => {
-    navigate("/report", { replace: true }); // ✅ Only navigate, don't clear session
-  };
-
   return (
     <div className="flex justify-center items-center h-screen overflow-hidden">
-      <div className="logout-btn-container">
-        <button onClick={handleLogout} className="logout-btn">
-          Logout
-        </button>
-        <button
-          onClick={handleReport}
-          className="bg-blue-500 mt-4 text-white px-4 py-2 rounded hover:bg-blue-600"
-        >
-          Report
-        </button>
-      </div>
       <div className="bg-white p-8 rounded shadow-lg w-full max-w-md">
         {/* ✅ Title */}
         <h2 className="text-2xl font-bold mb-4 text-center">
@@ -214,34 +200,17 @@ const Reprint = () => {
           >
             Submit
           </button>
-          <button
-            type="back"
-            className="w-full mt-2  text-white py-2 rounded"
-            onClick={() => navigate("/home")} // ✅ Redirect to /reprint page
-          >
-            Back
-          </button>
         </form>
 
         {/* ✅ Display Patient Details if Available */}
         {patientData && (
           <div className="mt-6 p-4 bg-gray-100 rounded shadow-md">
             <h3 className="text-lg font-bold">Patient Details</h3>
-            <p>
-              <b>Name:</b> {patientData.patientName}
-            </p>
-            <p>
-              <b>UHID:</b> {patientData.uhid}
-            </p>
-            <p>
-              <b>Age:</b> {patientData.age}
-            </p>
-            <p>
-              <b>Gender:</b> {patientData.gender}
-            </p>
-            <p>
-              <b>Path ID:</b> {patientData.pathId}
-            </p>
+            <p><b>Name:</b> {patientData.patientName}</p>
+            <p><b>UHID:</b> {patientData.uhid}</p>
+            <p><b>Age:</b> {patientData.age}</p>
+            <p><b>Gender:</b> {patientData.gender}</p>
+            <p><b>Path ID:</b> {patientData.pathId}</p>
           </div>
         )}
 
@@ -250,21 +219,12 @@ const Reprint = () => {
           <div className="mt-4 flex flex-col items-center p-4 bg-white rounded shadow-md">
             <h3 className="text-xl font-bold mb-2">APH</h3>
             <svg ref={barcodeRef}></svg>
-
-            <div className="mt-4 flex justify-center items-center gap-4 bg-gray-100 p-3 rounded-lg shadow-md">
-              <button
-                className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-                onClick={printBarcode}
-              >
-                Print
-              </button>
-              <button
-                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-                onClick={() => setBarcodeVisible(false)}
-              >
-                Close
-              </button>
-            </div>
+            <button
+              className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 mt-4"
+              onClick={printBarcode}
+            >
+              Print
+            </button>
           </div>
         )}
       </div>
