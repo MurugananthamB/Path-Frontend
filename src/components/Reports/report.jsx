@@ -7,7 +7,7 @@ import jsPDF from "jspdf";
 import "jspdf-autotable";
 
 const ReportScreen = () => {
-  const navigate = useNavigate(); // ✅ Define navigate for redirection
+  const navigate = useNavigate();
   const [pathId, setPathId] = useState("");
   const [uhid, setUhid] = useState("");
   const [fromDate, setFromDate] = useState("");
@@ -16,7 +16,6 @@ const ReportScreen = () => {
   const [filteredPatients, setFilteredPatients] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // ✅ Fetch all patients initially
   const fetchPatients = async () => {
     setLoading(true);
     try {
@@ -34,7 +33,6 @@ const ReportScreen = () => {
     fetchPatients();
   }, []);
 
-  // ✅ Instant Filtering for Path ID & UHID (Real-Time as You Type)
   useEffect(() => {
     const filteredData = patients.filter((patient) => {
       return (
@@ -45,28 +43,23 @@ const ReportScreen = () => {
     setFilteredPatients(filteredData);
   }, [pathId, uhid, patients]);
 
-  // ✅ Filtering by Date Range (Only When GO Button is Clicked)
   const applyDateFilter = () => {
     const filteredData = patients.filter((patient) => {
       const matchesDate =
         fromDate && toDate
           ? patient.date >= fromDate && patient.date <= toDate
           : true;
-
       return matchesDate;
     });
     setFilteredPatients(filteredData);
   };
 
-  // ✅ Export to Excel (With User ID properly mapped)
   const exportToExcel = () => {
-    const formattedData = filteredPatients.map(
-      ({ _id, userId, ...rest }, index) => ({
-        SNo: index + 1, // ✅ Adding Serial Number
-        ...rest,
-        userId: userId?.firstName || userId?.employeeId || "N/A", // ✅ Ensure User ID is shown properly
-      })
-    );
+    const formattedData = filteredPatients.map(({ _id, userId, ...rest }, index) => ({
+      SNo: index + 1,
+      ...rest,
+      userId: userId?.firstName || userId?.employeeId || "N/A",
+    }));
 
     const worksheet = XLSX.utils.json_to_sheet(formattedData);
     const workbook = XLSX.utils.book_new();
@@ -74,18 +67,17 @@ const ReportScreen = () => {
     XLSX.writeFile(workbook, "Patient_Report.xlsx");
   };
 
-  // ✅ Export to PDF
   const exportToPDF = () => {
     const doc = new jsPDF();
     doc.setFontSize(16);
     doc.text("Patient Report", 90, 10);
 
-    // Table Headers
     const headers = [
       [
         "SNo",
         "Date",
         "Time",
+        "Prefix",
         "Path ID",
         "UHID",
         "Patient Name",
@@ -95,32 +87,30 @@ const ReportScreen = () => {
       ],
     ];
 
-    // Table Data with SNo and Corrected User ID
     const data = filteredPatients.map(({ userId, ...patient }, index) => [
-      index + 1, // ✅ Add Serial Number
+      index + 1,
       patient.date,
       patient.time,
+      patient.prefix,
       patient.pathId,
       patient.uhid,
       patient.patientName,
       patient.age,
       patient.gender,
-      userId?.firstName || userId?.employeeId || "N/A", // ✅ Fix User ID
+      userId?.firstName || userId?.employeeId || "N/A",
     ]);
 
-    // Generate Table
     doc.autoTable({
       head: headers,
       body: data,
       startY: 20,
       theme: "grid",
-      headStyles: { fillColor: [41, 128, 185] }, // Blue header
+      headStyles: { fillColor: [41, 128, 185] },
     });
 
     doc.save("Patient_Report.pdf");
   };
 
-  // ✅ Logout Function
   const handleLogout = () => {
     localStorage.clear();
     sessionStorage.clear();
@@ -130,14 +120,13 @@ const ReportScreen = () => {
   return (
     <div className="flex items-center justify-center min-h-screen bg-[linear-gradient(135deg,#4caf50,#2a9d8f)] p-4">
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-7xl">
-        {" "}
         <div className="logout-btn-container">
           <button onClick={handleLogout} className="logout-btn">
             Logout
           </button>
         </div>
+
         <div className="flex justify-between items-center mb-4">
-          {/* ✅ Path ID - Instant Search */}
           <input
             type="text"
             placeholder="Path ID"
@@ -146,7 +135,6 @@ const ReportScreen = () => {
             className="border px-3 py-2 rounded-md w-1/5 focus:ring-2 focus:ring-blue-500"
           />
 
-          {/* ✅ UHID - Instant Search */}
           <input
             type="text"
             placeholder="UHID"
@@ -155,7 +143,6 @@ const ReportScreen = () => {
             className="border px-3 py-2 rounded-md w-1/5 focus:ring-2 focus:ring-blue-500"
           />
 
-          {/* ✅ Date Filtering (Only When "GO" is Clicked) */}
           <div className="flex items-center gap-2">
             <span>From:</span>
             <input
@@ -172,14 +159,13 @@ const ReportScreen = () => {
               className="border px-3 py-2 rounded-md focus:ring-2 focus:ring-blue-500"
             />
             <button
-              onClick={applyDateFilter} // ✅ GO Button Triggers Filter Only for Dates
+              onClick={applyDateFilter}
               className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
             >
               GO
             </button>
           </div>
 
-          {/* ✅ Export Buttons */}
           <div className="flex gap-2">
             <button
               onClick={exportToExcel}
@@ -195,7 +181,7 @@ const ReportScreen = () => {
             </button>
           </div>
         </div>
-        {/* Table Section with Sticky Headers */}
+
         <div className="overflow-y-auto max-h-[500px] border border-gray-300 rounded-md">
           {loading ? (
             <p className="text-center text-gray-500">Loading...</p>
@@ -203,8 +189,7 @@ const ReportScreen = () => {
             <table className="w-full border-collapse">
               <thead className="bg-gray-200 sticky top-0 z-10">
                 <tr>
-                  <th className="border px-4 py-2">S.No</th>{" "}
-                  {/* ✅ Adding Serial Number */}
+                  <th className="border px-4 py-2">S.No</th>
                   <th className="border px-4 py-2">Date</th>
                   <th className="border px-4 py-2">Time</th>
                   <th className="border px-4 py-2">Prefix</th>
@@ -219,15 +204,14 @@ const ReportScreen = () => {
               <tbody>
                 {filteredPatients.length === 0 ? (
                   <tr>
-                    <td colSpan="9" className="text-center py-4 text-gray-500">
+                    <td colSpan="10" className="text-center py-4 text-gray-500">
                       No data found
                     </td>
                   </tr>
                 ) : (
                   filteredPatients.map((patient, index) => (
                     <tr key={index} className="text-center">
-                      <td className="border px-4 py-2">{index + 1}</td>{" "}
-                      {/* ✅ S.No */}
+                      <td className="border px-4 py-2">{index + 1}</td>
                       <td className="border px-4 py-2">{patient.date}</td>
                       <td className="border px-4 py-2">{patient.time}</td>
                       <td className="border px-4 py-2">{patient.prefix}</td>
@@ -250,8 +234,9 @@ const ReportScreen = () => {
             </table>
           )}
         </div>
+
         <button
-          type="back"
+          type="button"
           onClick={() => navigate("/home")}
           className="bg-blue-500 mt-4 text-white px-4 py-2 rounded hover:bg-blue-600"
         >
