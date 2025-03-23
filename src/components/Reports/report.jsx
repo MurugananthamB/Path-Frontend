@@ -7,7 +7,7 @@ import jsPDF from "jspdf";
 import "jspdf-autotable";
 
 const ReportScreen = () => {
-    const navigate = useNavigate(); // ✅ Define navigate for redirection
+  const navigate = useNavigate(); // ✅ Define navigate for redirection
   const [pathId, setPathId] = useState("");
   const [uhid, setUhid] = useState("");
   const [fromDate, setFromDate] = useState("");
@@ -120,10 +120,22 @@ const ReportScreen = () => {
     doc.save("Patient_Report.pdf");
   };
 
+  // ✅ Logout Function
+  const handleLogout = () => {
+    localStorage.clear();
+    sessionStorage.clear();
+    navigate("/", { replace: true });
+  };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-[linear-gradient(135deg,#4caf50,#2a9d8f)] p-4">
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-7xl">
+        {" "}
+        <div className="logout-btn-container">
+          <button onClick={handleLogout} className="logout-btn">
+            Logout
+          </button>
+        </div>
         <div className="flex justify-between items-center mb-4">
           {/* ✅ Path ID - Instant Search */}
           <input
@@ -183,7 +195,6 @@ const ReportScreen = () => {
             </button>
           </div>
         </div>
-
         {/* Table Section with Sticky Headers */}
         <div className="overflow-y-auto max-h-[500px] border border-gray-300 rounded-md">
           {loading ? (
@@ -196,6 +207,7 @@ const ReportScreen = () => {
                   {/* ✅ Adding Serial Number */}
                   <th className="border px-4 py-2">Date</th>
                   <th className="border px-4 py-2">Time</th>
+                  <th className="border px-4 py-2">Prefix</th>
                   <th className="border px-4 py-2">Path ID</th>
                   <th className="border px-4 py-2">UHID</th>
                   <th className="border px-4 py-2">Patient Name</th>
@@ -218,6 +230,7 @@ const ReportScreen = () => {
                       {/* ✅ S.No */}
                       <td className="border px-4 py-2">{patient.date}</td>
                       <td className="border px-4 py-2">{patient.time}</td>
+                      <td className="border px-4 py-2">{patient.prefix}</td>
                       <td className="border px-4 py-2">{patient.pathId}</td>
                       <td className="border px-4 py-2">{patient.uhid}</td>
                       <td className="border px-4 py-2">
@@ -237,9 +250,9 @@ const ReportScreen = () => {
             </table>
           )}
         </div>
-              <button
-                  type="back"
-          onClick={() => navigate("/home")} 
+        <button
+          type="back"
+          onClick={() => navigate("/home")}
           className="bg-blue-500 mt-4 text-white px-4 py-2 rounded hover:bg-blue-600"
         >
           Back
