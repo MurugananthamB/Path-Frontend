@@ -1,4 +1,4 @@
-import React from "react";
+import React, { lazy, Suspense } from "react";
 import {
   BrowserRouter as Router,
   Route,
@@ -8,38 +8,46 @@ import {
 
 import "./index.css";
 import "./App.css";
-import Home from "./components/Home/Home";
-import Login from "./components/Login/Login";
-import Signup from "./components/Signup/Signup";
-import UserManagement from "./components/UserManagement/UserManagement";
-import Dashboard from "./components/Dashboard/dashboard";
-import Reprint from "./components/Home/Reprint";
-import ReportScreen from "./components/Reports/report";
-import Master from "./components/Masters/master";
-import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
+
+// Lazy-loaded components
+const Home = lazy(() => import("./components/Home/Home"));
+const Login = lazy(() => import("./components/Login/Login"));
+const Signup = lazy(() => import("./components/Signup/Signup"));
+const UserManagement = lazy(() =>
+  import("./components/UserManagement/UserManagement")
+);
+const Dashboard = lazy(() => import("./components/Dashboard/dashboard"));
+const Reprint = lazy(() => import("./components/Home/Reprint"));
+const ReportScreen = lazy(() => import("./components/Reports/report"));
+const Master = lazy(() => import("./components/Masters/Master"));
+const ProtectedRoute = lazy(() =>
+  import("./components/ProtectedRoute/ProtectedRoute")
+);
 
 function App() {
   return (
     <div className="App">
       <Router>
-        <Routes>
-          {/* ✅ Public Routes */}
-          <Route path="/" element={<Login />} />
+        <Suspense fallback={<div>Loading...</div>}>
+          <Routes>
+            {/* ✅ Public Routes */}
+            <Route path="/" element={<Login />} />
 
-          {/* ✅ Protected Routes (Only accessible if logged in) */}
-          <Route element={<ProtectedRoute />}>
-            <Route path="/Dashboard" element={<Dashboard />} />
-            <Route path="/Signup" element={<Signup />} />
-            <Route path="/Home" element={<Home />} />
-            <Route path="/master" element={<Master />} />
-            <Route path="/usermanagement" element={<UserManagement />} />
-            <Route path="/reprint" element={<Reprint />} />
-            <Route path="/report" element={<ReportScreen />} />
-          </Route>
+            {/* ✅ Protected Routes */}
+            <Route element={<ProtectedRoute />}>
+              <Route path="/Dashboard" element={<Dashboard />} />
+              <Route path="/Signup" element={<Signup />} />
+              <Route path="/Home" element={<Home />} />
+              <Route path="/master" element={<Master />} />
+              <Route path="/usermanagement" element={<UserManagement />} />
+              <Route path="/reprint" element={<Reprint />} />
+              <Route path="/report" element={<ReportScreen />} />
+            </Route>
 
-          {/* ✅ Redirect unknown routes to login */}
-          <Route path="*" element={<Navigate to="/" />} />
-        </Routes>
+            {/* ✅ Redirect unknown routes to login */}
+            <Route path="*" element={<Navigate to="/" />} />
+          </Routes>
+        </Suspense>
       </Router>
     </div>
   );
