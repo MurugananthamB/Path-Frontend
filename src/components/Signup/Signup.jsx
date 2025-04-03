@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { FaEye, FaEyeSlash } from "react-icons/fa"; // 👁 Import icons
 import api from "../API/api";
 
 const Signup = () => {
@@ -8,6 +9,9 @@ const Signup = () => {
     password: "",
     passwordConfirmation: "",
   });
+
+  const [showPassword, setShowPassword] = useState(false); // 👁 Toggle for password
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false); // 👁 Toggle for confirm password
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
 
@@ -40,36 +44,29 @@ const Signup = () => {
 
     try {
       // Send POST request to backend
-      const response = await api.post(
-        "/api/auth/signup",
-        formData
-      );
+      const response = await api.post("/api/auth/signup", formData);
 
       // If signup is successful
       console.log("Response:", response.data);
       setSuccess(true); // Set success to true to show a success message or redirect
       setError(null); // Reset any previous errors
     } catch (err) {
-      // Enhanced error handling for different scenarios
       console.error("Error:", err.response ? err.response.data : err.message);
 
       let errorMessage = "An error occurred while submitting the form.";
 
-      // If error response exists from backend, use that message
       if (err.response) {
         errorMessage = err.response.data.message || err.message;
       } else if (err.request) {
-        // No response from the server, network issues
         errorMessage =
           "No response from the server. Please check your network connection.";
       } else {
-        // Generic error handling for unexpected issues
         errorMessage =
           err.message || "Something went wrong. Please try again later.";
       }
 
-      setError(errorMessage); // Display the error message to the user
-      setSuccess(false); // Reset success flag
+      setError(errorMessage);
+      setSuccess(false);
     }
   };
 
@@ -99,35 +96,60 @@ const Signup = () => {
             />
           </div>
 
-          <div className="form-group">
+          {/* Password Field with Visibility Toggle */}
+          <div className="form-group" style={{ position: "relative" }}>
             <label>Password:</label>
             <input
-              type="password"
+              type={showPassword ? "text" : "password"} // 👁 Toggle visibility
               name="password"
               value={formData.password}
               onChange={handleChange}
               required
+              style={{ width: "100%", paddingRight: "40px" }}
             />
+            <span
+              onClick={() => setShowPassword(!showPassword)}
+              style={{
+                position: "absolute",
+                right: "10px",
+                top: "40px",
+                cursor: "pointer",
+              }}
+            >
+              {showPassword ? <FaEyeSlash /> : <FaEye />}
+            </span>
           </div>
-          <div className="form-group">
+
+          {/* Confirm Password Field with Visibility Toggle */}
+          <div className="form-group" style={{ position: "relative" }}>
             <label>Confirm Password:</label>
             <input
-              type="password"
+              type={showConfirmPassword ? "text" : "password"} // 👁 Toggle visibility
               name="passwordConfirmation"
               value={formData.passwordConfirmation}
               onChange={handleChange}
               required
+              style={{ width: "100%", paddingRight: "40px" }}
             />
+            <span
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              style={{
+                position: "absolute",
+                right: "10px",
+                top: "40px",
+                cursor: "pointer",
+              }}
+            >
+              {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+            </span>
           </div>
 
           <button type="submit" className="signup-btn">
             Signup
           </button>
         </form>
-        {success && <p className="success-msg">Signup successful!</p>}{" "}
-        {/* Show success message */}
-        {error && <p className="error-msg">{error}</p>}{" "}
-        {/* Show error message */}
+        {success && <p className="success-msg">Signup successful!</p>}
+        {error && <p className="error-msg">{error}</p>}
       </div>
     </div>
   );

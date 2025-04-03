@@ -1,56 +1,86 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom"; 
+import { useNavigate } from "react-router-dom";
+import { FaEye, FaEyeSlash } from "react-icons/fa"; // 👁 Import icons
 import api from "../API/api";
 
 const Login = () => {
   const [employeeId, setEmployeeId] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false); // 👁 Password visibility toggle
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
+  // ✅ Hardcoded Admin Credentials
+  const ADMIN_CREDENTIALS = {
+    employeeId: "admin",
+    password: "path@mapims2025",
+  };
 
-  if (!employeeId || !password) {
-    setError("Please enter both Employee ID and Password.");
-    return;
-  }
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  setLoading(true);
-
-  try {
-    const response = await api.post("/api/auth/login", {
-      employeeId,
-      password,
-    });
-
-    if (response.data && response.data.userId) {
-      localStorage.setItem("userId", response.data.userId);
-      sessionStorage.setItem("userId", response.data.userId);
-
-      setSuccess(true);
-      setError(null);
-      setLoading(false);
-
-      navigate("/Home");
-    } else {
-      throw new Error("Invalid response from server.");
+    if (!employeeId || !password) {
+      setError("Please enter both Employee ID and Password.");
+      return;
     }
-  } catch (err) {
-    console.error("Login error:", err.response?.data || err.message);
 
-    // ✅ Ensure error message is set and loading is stopped
-    setError(err.response?.data?.message || "Login failed. Please try again.");
-    setLoading(false); // ✅ Prevent infinite freeze
+    setLoading(true);
 
-    // Optional: Reload page only if necessary
-    // window.location.reload();
-  }
-};
+    try {
+      // ✅ Hardcoded Admin Login Check
+      if (
+        employeeId === ADMIN_CREDENTIALS.employeeId &&
+        password === ADMIN_CREDENTIALS.password
+      ) {
+        localStorage.setItem("userId", "admin");
+        localStorage.setItem("role", "admin");
+        sessionStorage.setItem("userId", "admin");
 
+        setSuccess(true);
+        setError(null);
+        setLoading(false);
+
+        navigate("/Dashboard"); // ✅ Redirect Admin to Dashboard
+        return;
+      }
+
+      // ✅ Normal Login Flow (API Call)
+      const response = await api.post("/api/auth/login", {
+        employeeId,
+        password,
+      });
+
+      if (response.data && response.data.userId) {
+        const { userId, role } = response.data;
+
+        localStorage.setItem("userId", userId);
+        sessionStorage.setItem("userId", userId);
+        localStorage.setItem("role", role);
+
+        setSuccess(true);
+        setError(null);
+        setLoading(false);
+
+        // ✅ Redirect based on user role
+        if (role === "admin") {
+          navigate("/Dashboard");
+        } else {
+          navigate("/Home");
+        }
+      } else {
+        throw new Error("Invalid response from server.");
+      }
+    } catch (err) {
+      console.error("Login error:", err.response?.data || err.message);
+      setError(
+        err.response?.data?.message || "Login failed. Please try again."
+      );
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="login-container">
@@ -69,15 +99,28 @@ const handleSubmit = async (e) => {
               required
             />
           </div>
-          <div className="form-group">
+          <div className="form-group" style={{ position: "relative" }}>
             <label>Password:</label>
             <input
-              type="password"
+              type={showPassword ? "text" : "password"} // 👁 Toggle visibility
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Enter Password"
               required
+              style={{ width: "100%", paddingRight: "40px" }}
             />
+            {/* 👁 Password visibility toggle button */}
+            <span
+              onClick={() => setShowPassword(!showPassword)}
+              style={{
+                position: "absolute",
+                right: "10px",
+                top: "45px",
+                cursor: "pointer",
+              }}
+            >
+              {showPassword ? <FaEyeSlash /> : <FaEye />}
+            </span>
           </div>
           <button
             type="submit"
@@ -94,13 +137,11 @@ const handleSubmit = async (e) => {
             onMouseLeave={(e) => (e.target.style.backgroundColor = "#4CAF50")}
             disabled={loading} // ✅ Disable button while logging in
           >
-            Login
+            {loading ? "Logging in..." : "Login"}
           </button>
         </form>
-        {success && <p style={{ color: "green" }}>Login successful!</p>}{" "}
-        {/* Show success message */}
-        {error && <p style={{ color: "red" }}>{error}</p>}{" "}
-        {/* Show error message */}
+        {success && <p style={{ color: "green" }}>Login successful!</p>}
+        {error && <p style={{ color: "red" }}>{error}</p>}
       </div>
     </div>
   );
