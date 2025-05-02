@@ -6,52 +6,69 @@ import api from "../API/api";
 const Reprint = () => {
   const navigate = useNavigate();
   const [pathId, setPathId] = useState("");
+  const [prefixOptions, setPrefixOptions] = useState([]);
+  const [selectedPrefix, setSelectedPrefix] = useState("");
   const [patientData, setPatientData] = useState(null);
   const [barcodeVisible, setBarcodeVisible] = useState(false);
   const barcodeRef = useRef(null);
 
-  const handleChange = (e) => {
-    setPathId(e.target.value);
+  // Fetch prefixes on Enter key
+  const handleKeyPress = async (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      if (!pathId) return alert("Please enter a Path ID");
+
+      try {
+        const encodedPathID = encodeURIComponent(pathId);
+        const response = await api.get(
+          `/api/patients/get-prefixes-for-pathid/${encodedPathID}`
+        );
+        if (response.data.length > 0) {
+          setPrefixOptions(response.data);
+          setSelectedPrefix(response.data[0]); // default to first prefix
+          setPatientData(null);
+          setBarcodeVisible(false);
+        } else {
+          alert("No prefixes found for this Path ID.");
+        }
+      } catch (error) {
+        console.error("Prefix fetch failed:", error);
+        alert("Error fetching prefixes.");
+      }
+    }
   };
 
+  // Fetch patient data with prefix + pathId
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!pathId) {
-      alert("Please enter a Path ID.");
+    if (!pathId || !selectedPrefix) {
+      alert("Path ID or prefix missing");
       return;
     }
 
     try {
-      const encodedPathID = encodeURIComponent(pathId);
       const response = await api.get(
-        `/api/patients/get-patient/${encodedPathID}`
+        `/api/patients/get-patient/${selectedPrefix}/${encodeURIComponent(
+          pathId
+        )}`
       );
-
       if (response.data) {
         setPatientData(response.data);
         setBarcodeVisible(true);
       } else {
-        alert("No patient found with this Path ID.");
+        alert("No patient found.");
       }
-    } catch (error) {
-      console.error(
-        "Error fetching patient data:",
-        error.response?.data || error.message
-      );
-      alert("Failed to fetch patient details. Please try again.");
+    } catch (err) {
+      console.error("Error:", err);
+      alert("Failed to get patient.");
     }
   };
 
-  // ✅ Preview barcode settings (same as print)
+  // Generate barcode
   useEffect(() => {
     if (barcodeVisible && patientData) {
-      const pathIdWithoutPrefix = patientData.barcode.replace(
-        patientData.prefix,
-        ""
-      );
-
-      JsBarcode(barcodeRef.current, pathIdWithoutPrefix, {
+      const pathIdOnly = patientData.barcode.replace(patientData.prefix, "");
+      JsBarcode(barcodeRef.current, pathIdOnly, {
         format: "CODE128",
         lineColor: "#000",
         width: 2.5,
@@ -62,53 +79,33 @@ const Reprint = () => {
     }
   }, [barcodeVisible, patientData]);
 
-  // ✅ Print Barcode Function (fixed)
+  // Print barcode
   const printBarcode = () => {
-    if (!patientData) {
-      alert("Barcode data missing. Please try again.");
-      return;
-    }
+    if (!patientData) return alert("No data to print");
 
-    const pathIdWithoutPrefix = patientData.barcode.replace(
-      patientData.prefix,
-      ""
-    );
+    const pathIdOnly = patientData.barcode.replace(patientData.prefix, "");
 
-    // Remove old containers
     document
       .querySelectorAll(".print-barcode-container")
       .forEach((el) => el.remove());
 
     const printContainer = document.createElement("div");
     printContainer.className = "print-barcode-container";
-    printContainer.style.display = "flex";
-    printContainer.style.flexDirection = "column";
-    printContainer.style.alignItems = "center";
-    printContainer.style.justifyContent = "flex-start";
-    printContainer.style.width = "63.5mm";
-    printContainer.style.height = "38.1mm";
-    printContainer.style.background = "white";
-    printContainer.style.margin = "0";
-    printContainer.style.padding = "0";
+    printContainer.style = `
+      display: flex; flex-direction: column; align-items: center;
+      width: 63.5mm; height: 38.1mm; background: white; padding: 0; margin: 0;
+    `;
 
-    // Header
     const heading = document.createElement("div");
     heading.textContent = `APH - ${patientData.prefix}`;
-    heading.style.fontSize = "18px";
-    heading.style.fontWeight = "900";
-    heading.style.fontFamily = "Arial, sans-serif";
-    heading.style.textAlign = "center";
-    heading.style.marginTop = "2mm";
-    heading.style.marginBottom = "2mm";
-    heading.style.color = "#000";
+    heading.style = "font-size: 18px; font-weight: bold; margin: 2mm 0;";
     printContainer.appendChild(heading);
 
-    // Barcode SVG
     const barcodeSVG = document.createElementNS(
       "http://www.w3.org/2000/svg",
       "svg"
     );
-    JsBarcode(barcodeSVG, pathIdWithoutPrefix, {
+    JsBarcode(barcodeSVG, pathIdOnly, {
       format: "CODE128",
       lineColor: "#000",
       width: 2.5,
@@ -116,102 +113,104 @@ const Reprint = () => {
       displayValue: false,
       margin: 0,
     });
-    barcodeSVG.style.margin = "0";
-    barcodeSVG.style.padding = "0";
     printContainer.appendChild(barcodeSVG);
 
-    // Path ID text
     const pathIdText = document.createElement("div");
-    pathIdText.textContent = pathIdWithoutPrefix;
-    pathIdText.style.fontSize = "16px";
-    pathIdText.style.fontWeight = "700";
-    pathIdText.style.marginTop = "2mm";
-    pathIdText.style.textAlign = "center";
-    pathIdText.style.fontFamily = "Arial, sans-serif";
+    pathIdText.textContent = pathIdOnly;
+    pathIdText.style = "font-size: 24px; font-weight: bold; margin-top: 2mm;";
     printContainer.appendChild(pathIdText);
 
-    // Print Style
-    const printStyle = document.createElement("style");
-    printStyle.innerHTML = `
+    const style = document.createElement("style");
+    style.innerHTML = `
       @media print {
         @page { size: 63.5mm 38.1mm; margin: 0; }
         body * { visibility: hidden; }
-        .print-barcode-container, .print-barcode-container * { visibility: visible; }
-        .print-barcode-container {
-          width: 63.5mm;
-          height: 38.1mm;
+        .print-barcode-container, .print-barcode-container * {
+          visibility: visible;
           position: fixed;
           left: 50%;
           top: 50%;
           transform: translate(-50%, -50%);
-          background: white;
-          text-align: center;
-          padding: 0;
-          margin: 0;
         }
         svg {
           width: 90% !important;
           height: 80px !important;
-          margin: 0;
-          padding: 0;
         }
       }
     `;
     document.body.appendChild(printContainer);
-    document.head.appendChild(printStyle);
+    document.head.appendChild(style);
 
     setTimeout(() => {
       window.print();
-      setTimeout(() => {
-        document.body.removeChild(printContainer);
-      }, 500);
+      setTimeout(() => document.body.removeChild(printContainer), 500);
     }, 500);
   };
 
-  // ✅ Logout Function
   const handleLogout = () => {
     localStorage.clear();
     sessionStorage.clear();
-    navigate("/login", { replace: true });
+    navigate("/", { replace: true });
   };
 
   const handleReport = () => {
     navigate("/report", { replace: true });
   };
 
-
   return (
     <div className="flex justify-center items-center h-screen overflow-hidden">
-      <div className="logout-btn-container">
-        <button onClick={handleLogout} className="logout-btn">
-          Logout
-        </button>
-        <button
-          onClick={handleReport}
-          className="bg-blue-500 mt-4 text-white px-4 py-2 rounded hover:bg-blue-600"
-        >
-          Report
-        </button>
-      </div>
-      
       <div className="bg-white p-8 rounded shadow-lg w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-4 text-center">
-          <u>Reprint Label</u>
+        <div className="logout-btn-container">
+          <button onClick={handleLogout} className="logout-btn">
+            Logout
+          </button>
+          <button
+            onClick={handleReport}
+            className="bg-blue-500 mt-4 text-white px-4 py-2 rounded hover:bg-blue-600"
+          >
+            Report
+          </button>
+        </div>
+        <h2 className="text-2xl font-bold mb-4 text-center underline">
+          Reprint Label
         </h2>
 
         <form onSubmit={handleSubmit}>
-          <div className="mb-4">
-            <label className="block text-gray-700 text-left font-medium">
-              Path ID:
-            </label>
-            <input
-              type="text"
-              value={pathId}
-              onChange={handleChange}
-              className="w-full px-3 py-2 mt-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
+          <div className="mb-4 flex gap-2">
+            <div className="flex-grow">
+              <label className="block text-gray-700 font-medium mb-1">
+                Path ID:
+              </label>
+              <input
+                type="text"
+                value={pathId}
+                onChange={(e) => setPathId(e.target.value)}
+                onKeyDown={handleKeyPress}
+                className="w-full px-3 py-2 h-[42px] border border-gray-300 rounded"
+                required
+              />
+            </div>
+
+            <div className="w-24">
+              <label className="block text-gray-700 font-medium mb-1">
+                Prefix:
+              </label>
+              <select
+                className="w-full px-2 py-2 h-[42px] border border-gray-300 rounded"
+                value={selectedPrefix}
+                onChange={(e) => setSelectedPrefix(e.target.value)}
+                disabled={prefixOptions.length === 0}
+              >
+                <option value="">--</option>
+                {prefixOptions.map((pre) => (
+                  <option key={pre} value={pre}>
+                    {pre}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
+
           <button
             type="submit"
             className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600"
@@ -220,8 +219,8 @@ const Reprint = () => {
           </button>
           <button
             type="button"
-            className="w-full mt-4 bg-gray-500 text-white py-2 rounded"
             onClick={() => navigate("/home")}
+            className="w-full mt-4 bg-gray-500 text-white py-2 rounded"
           >
             Back
           </button>
@@ -243,7 +242,7 @@ const Reprint = () => {
               <b>Gender:</b> {patientData.gender}
             </p>
             <p>
-              <b> Prefix :</b> {patientData.prefix}
+              <b>Prefix:</b> {patientData.prefix}
             </p>
             <p>
               <b>Path ID:</b> {patientData.pathId}

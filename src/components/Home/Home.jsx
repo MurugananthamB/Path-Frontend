@@ -18,7 +18,6 @@ const Home = () => {
   const [fullPathId, setFullPathId] = useState("");
   const [barcodeVisible, setBarcodeVisible] = useState(false);
   const barcodeRef = useRef(null);
-
   const [savedPrefix, setSavedPrefix] = useState("");
 
   useEffect(() => {
@@ -40,6 +39,41 @@ const Home = () => {
       ...formData,
       [name]: value,
     });
+  };
+
+  // ✅ Triggered only by search icon click
+  const handleUHIDSearch = async () => {
+    const uhid = formData.uhid?.trim();
+    if (!uhid) {
+      alert("Please enter UHID");
+      return;
+    }
+
+    try {
+      const res = await api.get(`/api/bbpatient/uhid/${uhid}`);
+      if (res.status === 200 && res.data) {
+        const { name, age, gender } = res.data;
+
+        const genderMap = {
+          M: "Male",
+          F: "Female",
+          O: "Other",
+        };
+        const mappedGender = genderMap[gender?.toUpperCase()] || "Other";
+
+        setFormData((prev) => ({
+          ...prev,
+          patientName: name || "",
+          age: age?.toString() || "",
+          gender: mappedGender,
+        }));
+      } else {
+        alert("UHID not found in Backbone.");
+      }
+    } catch (error) {
+      console.error("UHID fetch error:", error.message);
+      alert("Error fetching UHID details.");
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -167,7 +201,7 @@ const Home = () => {
     // HEADER - APH Prefix
     const heading = document.createElement("div");
     heading.textContent = `APH - ${savedPrefix}`;
-    heading.style.fontSize = "18px"; 
+    heading.style.fontSize = "18px";
     heading.style.fontWeight = "900";
     heading.style.fontFamily = "Arial, sans-serif";
     heading.style.textAlign = "center";
@@ -196,7 +230,7 @@ const Home = () => {
     // PATH ID Text BELOW barcode
     const pathIdText = document.createElement("div");
     pathIdText.textContent = pathIdWithoutPrefix;
-    pathIdText.style.fontSize = "18px";
+    pathIdText.style.fontSize = "24px";
     pathIdText.style.fontWeight = "700";
     pathIdText.style.marginTop = "2mm";
     pathIdText.style.textAlign = "center";
@@ -312,9 +346,54 @@ const Home = () => {
             </div>
           </div>
 
-          {/* Other fields */}
+          <div className="mt-4">
+            <label className="block text-gray-700 text-left font-medium mb-1">
+              UHID:
+            </label>
+            <div className="relative">
+              <input
+                type="number"
+                name="uhid"
+                value={formData.uhid}
+                onChange={handleChange}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault(); // ⛔ stop form submit
+                    handleUHIDSearch(); // ✅ fetch data instead
+                  }
+                }}
+                className="w-full px-3 py-2 pr-10 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Enter UHID"
+                required
+              />
+              <div className="absolute inset-y-0 right-3 flex items-center">
+                <button
+                  type="button"
+                  onClick={handleUHIDSearch}
+                  className="text-gray-500 hover:text-blue-600"
+                  title="Search"
+                  style={{
+                    background: "transparent",
+                    border: "none",
+                    padding: 0,
+                  }}
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    fill="currentColor"
+                    viewBox="0 0 16 16"
+                  >
+                    <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85zm-5.242 1.398a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11z" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Patient Name + Age */}
           {[
-            { name: "uhid", label: "UHID", type: "number" },
             { name: "patientName", label: "Patient Name", type: "text" },
             { name: "age", label: "Age", type: "number", maxLength: 2 },
           ].map((field) => (
@@ -334,22 +413,18 @@ const Home = () => {
             </div>
           ))}
 
+          {/* Read-only Gender */}
           <div>
             <label className="block text-gray-700 text-left font-medium">
               Gender:
             </label>
-            <select
+            <input
+              type="text"
               name="gender"
               value={formData.gender}
-              onChange={handleChange}
-              className="w-full px-3 py-2 mt-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            >
-              <option value="">Select</option>
-              <option value="male">Male</option>
-              <option value="female">Female</option>
-              <option value="other">Other</option>
-            </select>
+              readOnly
+              className="w-full px-3 py-2 mt-2 border border-gray-300 rounded bg-gray-100 focus:outline-none"
+            />
           </div>
         </div>
 
