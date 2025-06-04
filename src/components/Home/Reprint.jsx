@@ -81,26 +81,43 @@ const Reprint = () => {
 
   // Print barcode
   const printBarcode = () => {
-    if (!patientData) return alert("No data to print");
+    if (!patientData) {
+      alert("No data to print");
+      return;
+    }
 
     const pathIdOnly = patientData.barcode.replace(patientData.prefix, "");
 
+    // Remove old containers
     document
       .querySelectorAll(".print-barcode-container")
       .forEach((el) => el.remove());
 
+    // Create print container
     const printContainer = document.createElement("div");
     printContainer.className = "print-barcode-container";
-    printContainer.style = `
-      display: flex; flex-direction: column; align-items: center;
-      width: 63.5mm; height: 38.1mm; background: white; padding: 0; margin: 0;
-    `;
+    printContainer.style.display = "flex";
+    printContainer.style.flexDirection = "column";
+    printContainer.style.alignItems = "center";
+    printContainer.style.justifyContent = "center";
+    printContainer.style.width = "43.5mm";
+    printContainer.style.height = "18.1mm";
+    printContainer.style.background = "white";
+    printContainer.style.margin = "0";
+    printContainer.style.padding = "0";
 
-    const heading = document.createElement("div");
+    // Header (Prefix)
+    const heading = document.createElement("h3");
     heading.textContent = `APH - ${patientData.prefix}`;
-    heading.style = "font-size: 18px; font-weight: bold; margin: 2mm 0;";
+    heading.style.fontSize = "12px";
+    heading.style.fontWeight = "bold";
+    heading.style.fontFamily = "Arial, sans-serif";
+    heading.style.textAlign = "center";
+    heading.style.margin = "1mm 0 0.5mm 0";
+    heading.style.color = "#000";
     printContainer.appendChild(heading);
 
+    // Barcode
     const barcodeSVG = document.createElementNS(
       "http://www.w3.org/2000/svg",
       "svg"
@@ -109,43 +126,91 @@ const Reprint = () => {
       format: "CODE128",
       lineColor: "#000",
       width: 2.5,
-      height: 80,
+      height: 40,
       displayValue: false,
       margin: 0,
     });
+    barcodeSVG.style.margin = "0";
+    barcodeSVG.style.padding = "0";
     printContainer.appendChild(barcodeSVG);
 
-    const pathIdText = document.createElement("div");
+    // Path ID text
+    const pathIdText = document.createElement("p");
     pathIdText.textContent = pathIdOnly;
-    pathIdText.style = "font-size: 24px; font-weight: bold; margin-top: 2mm;";
+    pathIdText.style.fontSize = "12px";
+    pathIdText.style.fontWeight = "bold";
+    pathIdText.style.color = "#000";
+    pathIdText.style.margin = "0.5mm 0 0 0";
+    pathIdText.style.textAlign = "center";
+    pathIdText.style.fontFamily = "Arial, sans-serif";
     printContainer.appendChild(pathIdText);
 
+    // Print styles
     const style = document.createElement("style");
     style.innerHTML = `
       @media print {
-        @page { size: 63.5mm 38.1mm; margin: 0; }
-        body * { visibility: hidden; }
-        .print-barcode-container, .print-barcode-container * {
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+          page-break-inside: avoid;
+        }
+        body * {
+          visibility: hidden;
+        }
+        .print-barcode-container, 
+        .print-barcode-container * {
           visibility: visible;
+        }
+        .print-barcode-container {
           position: fixed;
-          left: 50%;
+          left: 52%;
           top: 50%;
           transform: translate(-50%, -50%);
+          width: 43.5mm;
+          height: 18.1mm;
+          background: white;
+          text-align: center;
+          font-family: Arial, sans-serif;
+          padding: 0;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+        }
+        .print-barcode-container h3 {
+          font-size: 20px;
+          font-weight: bold;
+          margin-bottom: 1mm;
         }
         svg {
-          width: 90% !important;
-          height: 80px !important;
+          width: 40mm;
+          height: 15mm;
+          display: block;
+          margin: 0 auto;
+        }
+        .print-barcode-container p {
+          font-size: 20px;
+          font-weight: bold;
+          text-align: center;
+          margin-top: 0mm;
+          color: #000;
+          font-family: Arial, sans-serif;
         }
       }
     `;
-    document.body.appendChild(printContainer);
     document.head.appendChild(style);
+    document.body.appendChild(printContainer);
 
+    // Trigger print
     setTimeout(() => {
       window.print();
-      setTimeout(() => document.body.removeChild(printContainer), 500);
+      setTimeout(() => {
+        document.body.removeChild(printContainer);
+      }, 500);
     }, 500);
   };
+  
 
   const handleLogout = () => {
     localStorage.clear();
