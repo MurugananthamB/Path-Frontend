@@ -54,19 +54,21 @@ const Home = () => {
       if (res.status === 200 && res.data) {
         const { name, age, gender } = res.data;
 
-        const genderMap = {
-          M: "Male",
-          F: "Female",
-          O: "Other",
-        };
-        const mappedGender = genderMap[gender?.toUpperCase()] || "Other";
+     const genderMap = {
+       M: "Male",
+       F: "Female",
+       O: "Other",
+     };
+     const mappedGender = (
+       genderMap[gender?.toUpperCase()] || "Other"
+     ).toLowerCase(); // ⬅ Fix applied
 
-        setFormData((prev) => ({
-          ...prev,
-          patientName: name || "",
-          age: age?.toString() || "",
-          gender: mappedGender,
-        }));
+     setFormData((prev) => ({
+       ...prev,
+       patientName: name || "",
+       age: age?.toString() || "",
+       gender: mappedGender, // Will match "male", "female", or "other"
+     }));
       } else {
         alert("UHID not found in Backbone.");
       }
@@ -180,33 +182,29 @@ const Home = () => {
 
     const pathIdWithoutPrefix = fullPathId.replace(savedPrefix, "");
 
-    // Remove old containers
     document
       .querySelectorAll(".print-barcode-container")
       .forEach((el) => el.remove());
 
-    // Main container
     const printContainer = document.createElement("div");
     printContainer.className = "print-barcode-container";
     printContainer.style.display = "flex";
     printContainer.style.flexDirection = "column";
     printContainer.style.alignItems = "center";
-    printContainer.style.justifyContent = "flex-start";
-    printContainer.style.width = "63.5mm";
-    printContainer.style.height = "38.1mm";
+    printContainer.style.justifyContent = "center";
+    printContainer.style.width = "43.5mm";
+    printContainer.style.height = "18.1mm";
     printContainer.style.background = "white";
     printContainer.style.margin = "0";
     printContainer.style.padding = "0";
 
-    // HEADER - APH Prefix
-    const heading = document.createElement("div");
+    const heading = document.createElement("h3");
     heading.textContent = `APH - ${savedPrefix}`;
-    heading.style.fontSize = "18px";
-    heading.style.fontWeight = "900";
+    heading.style.fontSize = "12px";
+    heading.style.fontWeight = "bold";
     heading.style.fontFamily = "Arial, sans-serif";
     heading.style.textAlign = "center";
-    heading.style.marginTop = "2mm";
-    heading.style.marginBottom = "2mm";
+    heading.style.margin = "1mm 0 0.5mm 0";
     heading.style.color = "#000";
     printContainer.appendChild(heading);
 
@@ -219,7 +217,7 @@ const Home = () => {
       format: "CODE128",
       lineColor: "#000",
       width: 2.5,
-      height: 80,
+      height: 40,
       displayValue: false,
       margin: 0,
     });
@@ -227,53 +225,85 @@ const Home = () => {
     barcodeSVG.style.padding = "0";
     printContainer.appendChild(barcodeSVG);
 
-    // PATH ID Text BELOW barcode
-    const pathIdText = document.createElement("div");
+    const pathIdText = document.createElement("p");
     pathIdText.textContent = pathIdWithoutPrefix;
-    pathIdText.style.fontSize = "24px";
-    pathIdText.style.fontWeight = "700";
-    pathIdText.style.marginTop = "2mm";
+    pathIdText.style.fontSize = "12px";
+    pathIdText.style.fontWeight = "bold";
+    pathIdText.style.color = "#000";
+    pathIdText.style.margin = "0.5mm 0 0 0";
     pathIdText.style.textAlign = "center";
     pathIdText.style.fontFamily = "Arial, sans-serif";
     printContainer.appendChild(pathIdText);
 
-    // PRINT STYLE
     const printStyle = document.createElement("style");
     printStyle.innerHTML = `
-    @media print {
-      @page { size: 63.5mm 38.1mm; margin: 0; }
-      body * { visibility: hidden; }
-      .print-barcode-container, .print-barcode-container * { visibility: visible; }
+       @media print {
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        page-break-inside: avoid;
+      }
+      body * {
+        visibility: hidden;
+      }
+      .print-barcode-container, 
+      .print-barcode-container * {
+        visibility: visible;
+      }
       .print-barcode-container {
-        width: 63.5mm;
-        height: 38.1mm;
         position: fixed;
-        left: 50%;
+        left: 52%;
         top: 50%;
         transform: translate(-50%, -50%);
+        width: 43.5mm;
+        height: 18.1mm;
         background: white;
         text-align: center;
+        font-family: Arial, sans-serif;
         padding: 0;
-        margin: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+      .print-barcode-container h3 {
+        font-size: 20px;
+        font-weight: bold;
+        margin-bottom: 1mm;
       }
       svg {
-        width: 90% !important;
-        height: 80px !important;
-        margin: 0;
-        padding: 0;
+        width: 40mm;
+        height: 15mm;
+        display: block;
+        margin: 0 auto;
       }
+      .print-barcode-container p {
+  font-size: 20px;
+  font-weight: bold;
+  text-align: center;
+  margin-top: 0mm;
+  color: #000;
+  font-family: Arial, sans-serif;
+}
     }
   `;
 
-    document.head.appendChild(printStyle);
-    document.body.appendChild(printContainer);
+  document.head.appendChild(printStyle);
+  document.body.appendChild(printContainer);
 
-    setTimeout(() => {
-      window.print();
+    // DEBUG: Check what will be printed
+    console.log("🖨️ Print Preview Content:\n", printContainer.innerHTML);
+
+    // ✅ Wait for DOM to render before printing
+    requestAnimationFrame(() => {
       setTimeout(() => {
-        document.body.removeChild(printContainer);
+        window.print();
+        setTimeout(() => {
+          document.body.removeChild(printContainer);
+        }, 500);
       }, 500);
-    }, 500);
+    });
   };
 
   const handleLogout = () => {
@@ -413,18 +443,23 @@ const Home = () => {
             </div>
           ))}
 
-          {/* Read-only Gender */}
+        
           <div>
             <label className="block text-gray-700 text-left font-medium">
               Gender:
             </label>
-            <input
-              type="text"
+            <select
               name="gender"
               value={formData.gender}
-              readOnly
-              className="w-full px-3 py-2 mt-2 border border-gray-300 rounded bg-gray-100 focus:outline-none"
-            />
+              onChange={handleChange}
+              className="w-full px-3 py-2 mt-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            >
+              <option value="">Select</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+              <option value="other">Other</option>
+            </select>
           </div>
         </div>
 
